@@ -5,10 +5,12 @@ namespace Assets.Version2
     public class Unit : MonoBehaviour
     {
         [Header("Component Reference")]
-        [SerializeField] private Detector m_detector;
+        [SerializeField] private Health m_health;
 
         [SerializeField] private Movement m_movement;
         [SerializeField] private Vector3 m_defaultPosition;
+
+        [SerializeField] private Detector m_detector;
 
         private void Update()
         {
@@ -20,6 +22,7 @@ namespace Assets.Version2
 
         private void Awake()
         {
+            m_health.Initialize();
             m_movement.Initialize();
         }
     }
