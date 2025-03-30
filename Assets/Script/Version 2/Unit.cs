@@ -20,8 +20,19 @@ namespace Assets.Version2
             m_interaction.UpdateCD(t_deltaTime);
 
 
-            Transform t_target = m_detector.DetectClosestTarget(out float t_targetDistance);
-            Vector3 t_targetPosition = t_target ? t_target.position : m_defaultPosition;
+            Vector3 t_targetPosition;
+            float t_targetDistance;
+            Transform t_target = m_detector.DetectClosestTarget(out float t_targetSquaredDistance);
+            if (t_target)
+            {
+                t_targetPosition = t_target.position;
+                t_targetDistance = Mathf.Sqrt(t_targetSquaredDistance);
+            }
+            else
+            {
+                t_targetPosition = m_defaultPosition;
+                t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
+            }
 
             if (t_target && m_interaction.Range >= t_targetDistance)
             {
@@ -32,7 +43,7 @@ namespace Assets.Version2
             }
             else
             {
-                m_movement.MoveTo(t_targetPosition);
+                m_movement.MoveTo(t_targetPosition, t_targetDistance, t_deltaTime);
             }
         }
 
