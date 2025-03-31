@@ -4,6 +4,9 @@ namespace Assets.Version2
 {
     public class Unit : MonoBehaviour
     {
+        [Header("Data")]
+        [SerializeField] private int m_group = 64;//LayerMask
+
         [Header("Component Reference")]
         [SerializeField] private Health m_health;
 
@@ -13,6 +16,8 @@ namespace Assets.Version2
         [SerializeField] private Vector3 m_defaultPosition;
 
         [SerializeField] private Detector m_detector;
+
+        [SerializeField] private View m_view;
 
         private void Update()
         {
@@ -33,6 +38,8 @@ namespace Assets.Version2
                 t_targetPosition = m_defaultPosition;
                 t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
             }
+
+            m_view.Face(t_targetPosition.x, m_group);
 
             if (t_target && m_interaction.Range >= t_targetDistance)
             {
