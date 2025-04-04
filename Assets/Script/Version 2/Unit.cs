@@ -59,6 +59,12 @@ namespace Assets.Version2
             m_health.Initialize();
             m_interaction.Initialize();
             m_movement.Initialize();
+            m_view.Initialize();
+        }
+
+        private void OnDisable()
+        {
+            m_view.Uninitialize();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Version2
@@ -7,6 +8,9 @@ namespace Assets.Version2
         public static readonly int NLI_Group = 1 << 7;
 
         [SerializeField] private SpriteRenderer m_spriteRenderer;
+        [SerializeField] private float m_hurtFlashDuration = 0.35f;
+        [SerializeField] private IEnumerator m_coroutine;
+        [SerializeField] private bool m_coroutineStatus;
 
         public void Face(float positionX, int group)
         {
@@ -17,6 +21,39 @@ namespace Assets.Version2
             }
 
             m_spriteRenderer.flipX = t_face;
+        }
+
+        public void HurtVisualEffect(float point)
+        {
+            if (m_coroutineStatus)
+            {
+                StopCoroutine(m_coroutine);
+            }
+
+            m_coroutine = HurtFlash();
+            StartCoroutine(m_coroutine);
+        }
+
+        private IEnumerator HurtFlash()
+        {
+            m_coroutineStatus = true;
+
+            m_spriteRenderer.color = Color.red;
+            yield return new WaitForSeconds(m_hurtFlashDuration);
+            m_spriteRenderer.color = Color.white;
+
+            m_coroutineStatus = false;
+        }
+
+        public void Initialize()
+        {
+            GetComponent<Health>().OnHurt += HurtVisualEffect;
+            m_coroutineStatus = false;
+        }
+
+        public void Uninitialize()
+        {
+            GetComponent<Health>().OnHurt -= HurtVisualEffect;
         }
     }
 }
