@@ -31,5 +31,17 @@ namespace Assets.Version2
 
             return t_target;
         }
+
+        public void Initialize(int group)
+        {
+            if (group == 64)
+            {
+                m_targetLayerMask = 128;
+            }
+            else
+            {
+                m_targetLayerMask = 64;
+            }
+        }
     }
 }

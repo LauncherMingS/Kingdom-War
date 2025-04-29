@@ -59,6 +59,7 @@ namespace Assets.Version2
             m_health.Initialize();
             m_interaction.Initialize();
             m_movement.Initialize();
+            m_detector.Initialize(m_group);
             m_view.Initialize();
         }
 
