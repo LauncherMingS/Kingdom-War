@@ -5,7 +5,7 @@ namespace Assets.Version2
     public class Unit : MonoBehaviour
     {
         [Header("Data")]
-        [SerializeField] private int m_group = 64;//LayerMask
+        [SerializeField] private int m_group;//LayerMask
 
         [Header("Component Reference")]
         [SerializeField] private Health m_health;
@@ -54,7 +54,7 @@ namespace Assets.Version2
             }
         }
 
-        private void Awake()
+        private void Start()
         {
             m_health.Initialize();
             m_interaction.Initialize();

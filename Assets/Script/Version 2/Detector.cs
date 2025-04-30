@@ -7,7 +7,7 @@ namespace Assets.Version2
         private static Collider[] detectedColliders = new Collider[64];
 
         [SerializeField] private float m_detectRange = 3f;
-        [SerializeField] private int m_targetLayerMask = 128;
+        [SerializeField] private int m_targetLayerMask;
 
         public Transform DetectClosestTarget(out float targetSquaredDistance)
         {
@@ -34,13 +34,13 @@ namespace Assets.Version2
 
         public void Initialize(int group)
         {
-            if (group == 64)
+            if (group == GameManager.Instance.SYWS)
             {
-                m_targetLayerMask = 128;
+                m_targetLayerMask = GameManager.Instance.NLI;
             }
             else
             {
-                m_targetLayerMask = 64;
+                m_targetLayerMask = GameManager.Instance.SYWS;
             }
         }
     }
