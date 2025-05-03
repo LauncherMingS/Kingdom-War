@@ -54,10 +54,12 @@ namespace Assets.Version2
 
             m_view.Face(t_targetPosition.x, m_group);
 
-            if (t_target && m_interaction.Range >= t_targetDistance)
+            if (t_target != null && m_interaction.Range >= t_targetDistance)
             {
-                if (m_interaction.CurrentCD == 0f)
+                SwitchUnitState(UnitState.Attack);
+                if (m_interaction.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
                 {
+                    m_view.ResetAnimation((int)m_currentState);
                     m_interaction.Interact(t_target);
                 }
             }
