@@ -53,9 +53,9 @@ namespace Assets.Version2
             m_coroutineStatus = false;
         }
 
-        public bool AnimationIsDone(int currentState)
+        public bool AnimationIsDone(int unitState)
         {
-            return m_mixerPlayable.GetInput(currentState).IsDone();
+            return m_mixerPlayable.GetInput(unitState).IsDone();
         }
 
         public void SwitchAnimation(int newState, int originState)
@@ -84,15 +84,15 @@ namespace Assets.Version2
             m_mixerPlayable = AnimationMixerPlayable.Create(m_playableGraph, 3);
             t_playableOutput.SetSourcePlayable(m_mixerPlayable);
 
-            AnimationClipPlayable t_attackPlayable = AnimationClipPlayable.Create(m_playableGraph, m_attackClip);
             AnimationClipPlayable t_idlePlayable = AnimationClipPlayable.Create(m_playableGraph, m_idleClip);
             AnimationClipPlayable t_movePlayable = AnimationClipPlayable.Create(m_playableGraph, m_moveClip);
+            AnimationClipPlayable t_attackPlayable = AnimationClipPlayable.Create(m_playableGraph, m_attackClip);
+            t_movePlayable.SetSpeed(6d);
             t_attackPlayable.SetDuration((double)m_attackClip.length);
             t_attackPlayable.SetSpeed(1.5d);
-            t_movePlayable.SetSpeed(6d);
             m_playableGraph.Connect(t_idlePlayable, 0, m_mixerPlayable, 0);
-            m_playableGraph.Connect(t_attackPlayable, 0, m_mixerPlayable, 1);
-            m_playableGraph.Connect(t_movePlayable, 0, m_mixerPlayable, 2);
+            m_playableGraph.Connect(t_movePlayable, 0, m_mixerPlayable, 1);
+            m_playableGraph.Connect(t_attackPlayable, 0, m_mixerPlayable, 2);
 
             SwitchAnimation(0, 1);
 

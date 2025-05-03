@@ -5,6 +5,7 @@ namespace Assets.Version2
     public class Unit : MonoBehaviour
     {
         [Header("Data")]
+        [SerializeField] private UnitState m_currentState = UnitState.Idle;
         [SerializeField] private int m_group;//LayerMask
 
         [Header("Component Reference")]
@@ -18,6 +19,18 @@ namespace Assets.Version2
         [SerializeField] private Detector m_detector;
 
         [SerializeField] private View m_view;
+
+        //Switch unit's state also switch unit's animation
+        public void SwitchUnitState(UnitState newUnitState)
+        {
+            if (m_currentState == newUnitState)
+            {
+                return;
+            }
+
+            m_view.SwitchAnimation((int)newUnitState, (int)m_currentState);
+            m_currentState = newUnitState;
+        }
 
         private void Update()
         {
@@ -66,6 +79,13 @@ namespace Assets.Version2
         private void OnDisable()
         {
             m_view.Uninitialize();
+        }
+
+        public enum UnitState : byte
+        {
+            Idle = 0,
+            Move = 1,
+            Attack = 2
         }
     }
 }
