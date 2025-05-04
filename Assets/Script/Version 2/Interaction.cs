@@ -15,9 +15,9 @@ namespace Assets.Version2
 
         public void Interact(Transform target)
         {
-            if (target.TryGetComponent<Health>(out Health health))
+            if (target.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
-                health.ModifyHealth(m_currentPoint);
+                damageable.TakeDamage(m_currentPoint);
                 m_currentCD = m_baseCD;
             }
         }

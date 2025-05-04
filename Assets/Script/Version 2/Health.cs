@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public class Health : MonoBehaviour
+    public class Health : MonoBehaviour, IDamageable
     {
         [SerializeField] private float m_maxHP = 20f;
         [SerializeField] private float m_currentHP;
 
         public event Action<float> OnHurt;
 
-        public void ModifyHealth(float point)
+        void IDamageable.TakeDamage(float point)
         {
             m_currentHP = Mathf.Clamp(m_currentHP + point, 0f, m_maxHP);
 
