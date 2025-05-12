@@ -4,6 +4,8 @@ namespace Assets.Version2
 {
     public class Interaction : MonoBehaviour
     {
+        [SerializeField] private Transform m_target;
+
         [SerializeField] private float m_basePoint = -3f;
         [SerializeField] private float m_currentPoint;
         [SerializeField] private float m_baseCD = 2.5f;
@@ -13,13 +15,18 @@ namespace Assets.Version2
         public float CurrentCD => m_currentCD;
         public float Range => m_range;
 
-        public void Interact(Transform target)
+        public void SetTarget(Transform target) => m_target = target;
+
+        //Trigger by Animation event
+        public void OnAttack()
         {
-            if (target.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (m_target != null && m_target.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
                 damageable.TakeDamage(m_currentPoint);
                 m_currentCD = m_baseCD;
             }
+
+            m_target = null;
         }
 
         public void UpdateCD(float deltaTime)

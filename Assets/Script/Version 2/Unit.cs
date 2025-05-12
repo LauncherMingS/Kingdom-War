@@ -60,7 +60,7 @@ namespace Assets.Version2
                 if (m_interaction.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
                 {
                     m_view.ResetAnimation((int)m_currentState);
-                    m_interaction.Interact(t_target);
+                    m_interaction.SetTarget(t_target);
                 }
             }
             else
