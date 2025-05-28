@@ -63,9 +63,14 @@ namespace Assets.Version2
                     m_interaction.SetTarget(t_target);
                 }
             }
+            else if (t_targetDistance != 0f)
+            {
+                SwitchUnitState(UnitState.Move);
+                m_movement.MoveTo(t_targetPosition, t_targetDistance, t_deltaTime);
+            }
             else
             {
-                m_movement.MoveTo(t_targetPosition, t_targetDistance, t_deltaTime);
+                SwitchUnitState(UnitState.Idle);
             }
         }
 

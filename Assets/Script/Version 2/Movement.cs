@@ -14,11 +14,6 @@ namespace Assets.Version2
 
         public void MoveTo(Vector3 targetPosition, float targetDistance, float deltaTime)
         {
-            if (targetDistance == 0f)
-            {
-                return;
-            }
-
             if (m_stopDistance > targetDistance)
             {
                 transform.position = targetPosition;
