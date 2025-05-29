@@ -88,7 +88,7 @@ namespace Assets.Version2
             m_view.Uninitialize();
         }
 
-        public enum UnitState : byte
+        public enum UnitState
         {
             Idle = 0,
             Move = 1,
