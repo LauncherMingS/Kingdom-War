@@ -4,6 +4,8 @@ namespace Assets.Version2
 {
     public class Unit : MonoBehaviour
     {
+        [SerializeField] private Controller m_controller;
+
         [Header("Data")]
         [SerializeField] private UnitState m_currentState = UnitState.Idle;
         [SerializeField] private int m_group;//LayerMask
@@ -19,6 +21,11 @@ namespace Assets.Version2
         [SerializeField] private Detector m_detector;
 
         [SerializeField] private View m_view;
+
+        public Vector3 SetDefaultPosition
+        {
+            set => m_defaultPosition = value;
+        }
 
         //Switch unit's state also switch unit's animation
         public void SwitchUnitState(UnitState newUnitState)
@@ -40,37 +47,65 @@ namespace Assets.Version2
 
             Vector3 t_targetPosition;
             float t_targetDistance;
-            Transform t_target = m_detector.DetectClosestTarget(out float t_targetSquaredDistance);
-            if (t_target)
-            {
-                t_targetPosition = t_target.position;
-                t_targetDistance = Mathf.Sqrt(t_targetSquaredDistance);
-            }
-            else
-            {
-                t_targetPosition = m_defaultPosition;
-                t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
-            }
+            Transform t_target;
 
-            m_view.Face(t_targetPosition.x, m_group);
+            switch (m_controller.CurrentCommand)
+            {
+                case Controller.Command.Attack:
+                case Controller.Command.Defend:
 
-            if (t_target != null && m_interaction.Range >= t_targetDistance)
-            {
-                SwitchUnitState(UnitState.Attack);
-                if (m_interaction.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
-                {
-                    m_view.ResetAnimation((int)m_currentState);
-                    m_interaction.SetTarget(t_target);
-                }
-            }
-            else if (t_targetDistance != 0f)
-            {
-                SwitchUnitState(UnitState.Move);
-                m_movement.MoveTo(t_targetPosition, t_targetDistance, t_deltaTime);
-            }
-            else
-            {
-                SwitchUnitState(UnitState.Idle);
+                    t_target = m_detector.DetectClosestTarget(out float t_targetSquaredDistance);
+
+                    if (t_target != null)
+                    {
+                        t_targetPosition = t_target.position;
+                        t_targetDistance = Mathf.Sqrt(t_targetSquaredDistance);
+                    }
+                    else
+                    {
+                        t_targetPosition = m_defaultPosition;
+                        t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
+                    }
+
+                    m_view.Face(t_targetPosition.x, m_group);
+
+                    if (t_target != null && m_interaction.Range >= t_targetDistance)
+                    {
+                        SwitchUnitState(UnitState.Attack);
+                        if (m_interaction.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
+                        {
+                            m_view.ResetAnimation((int)m_currentState);
+                            m_interaction.SetTarget(t_target);
+                        }
+                    }
+                    else if (t_targetDistance > 0f)
+                    {
+                        SwitchUnitState(UnitState.Move);
+                        m_movement.MoveTo(t_targetPosition, t_targetDistance, t_deltaTime);
+                    }
+                    else
+                    {
+                        SwitchUnitState(UnitState.Idle);
+                    }
+
+                    break;
+                case Controller.Command.Retreat:
+
+                    t_targetPosition = m_defaultPosition;
+                    t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
+                    m_view.Face(t_targetPosition.x, m_group);
+
+                    if (t_targetDistance > 0f)
+                    {
+                        SwitchUnitState(UnitState.Move);
+                        m_movement.MoveTo(t_targetPosition, t_targetDistance, t_deltaTime);
+                    }
+                    else
+                    {
+                        SwitchUnitState(UnitState.Idle);
+                    }
+
+                    break;
             }
         }
 
