@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Version2
@@ -6,12 +7,13 @@ namespace Assets.Version2
     {
         [SerializeField] private Command m_currentCommand = Command.None;
 
+        [SerializeField] private Vector3 m_currentIndicationPosition;
         [SerializeField] private Vector3 m_enemyBasePosition;
         [SerializeField] private Vector3 m_defendPosition;
         [SerializeField] private Vector3 m_retreatPosition;
 
         //Test
-        [SerializeField] private Unit m_unit;
+        [SerializeField] private List<Unit> m_units;
 
         public Command CurrentCommand => m_currentCommand;
 
@@ -36,15 +38,29 @@ namespace Assets.Version2
             switch (m_currentCommand)
             {
                 case Command.Attack:
-                    m_unit.SetDefaultPosition = m_enemyBasePosition;
+                    m_currentIndicationPosition = m_enemyBasePosition;
                     break;
                 case Command.Defend:
-                    m_unit.SetDefaultPosition = m_defendPosition;
+                    m_currentIndicationPosition = m_defendPosition;
                     break;
                 case Command.Retreat:
-                    m_unit.SetDefaultPosition = m_retreatPosition;
+                    m_currentIndicationPosition = m_retreatPosition;
+                    break;
+                default:
+                    m_currentIndicationPosition = Vector3.zero;
                     break;
             }
+
+            for (int i = 0;i <  m_units.Count;i++)
+            {
+                m_units[i].SetDefaultPosition = m_currentIndicationPosition;
+            }
+        }
+
+        public void AddUnit(Unit unit)
+        {
+            m_units.Add(unit);
+            unit.SetDefaultPosition = m_currentIndicationPosition;
         }
 
         private void Start()

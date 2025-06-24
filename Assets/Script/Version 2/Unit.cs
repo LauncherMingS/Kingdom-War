@@ -22,6 +22,11 @@ namespace Assets.Version2
 
         [SerializeField] private View m_view;
 
+        public Controller SetController
+        {
+            set => m_controller = value;
+        }
+
         public Vector3 SetDefaultPosition
         {
             set => m_defaultPosition = value;
