@@ -102,7 +102,7 @@ namespace Assets.Version2
                 t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
             }
 
-            m_view.Face(t_targetPosition.x, m_group);
+            m_view.Face(t_targetPosition.x);
 
             if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
@@ -122,7 +122,7 @@ namespace Assets.Version2
         {
             float t_targetDistance = Vector3.Distance(transform.position, m_retreatPosition);
 
-            m_view.Face(m_retreatPosition.x, m_group);
+            m_view.Face(m_retreatPosition.x);
 
             if (t_targetDistance > 0f)
             {
@@ -158,7 +158,7 @@ namespace Assets.Version2
             m_attackHandler.Initialize();
             m_movement.Initialize();
             m_detectionHandler.Initialize(m_group);
-            m_view.Initialize();
+            m_view.Initialize(m_group);
         }
 
         private void OnDisable()

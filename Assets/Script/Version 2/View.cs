@@ -12,6 +12,7 @@ namespace Assets.Version2
         [SerializeField] private float m_hurtFlashDuration = 0.35f;
         [SerializeField] private IEnumerator m_coroutine;
         [SerializeField] private bool m_coroutineStatus;
+        [SerializeField] private bool m_defaultFlipX;
 
         [Header("Animation")]
         [SerializeField] private PlayableGraph m_playableGraph;
@@ -20,10 +21,14 @@ namespace Assets.Version2
         [SerializeField] private AnimationClip m_idleClip;
         [SerializeField] private AnimationClip m_moveClip;
 
-        public void Face(float positionX, int group)
+        public void Face(float positionX)
         {
-            bool t_face = true;
-            if (transform.position.x > positionX || (group & GameManager.Instance.NLI) != 0)
+            bool t_face = m_defaultFlipX;
+            if (transform.position.x < positionX)
+            {
+                t_face = true;
+            }
+            else if (transform.position.x > positionX)
             {
                 t_face = false;
             }
@@ -70,7 +75,7 @@ namespace Assets.Version2
             m_mixerPlayable.GetInput(currentState).SetDone(false);
         }
 
-        public void Initialize()
+        public void Initialize(int group)
         {
             #region Animation
             Animator t_animator = GetComponent<Animator>();
@@ -101,6 +106,7 @@ namespace Assets.Version2
 
             GetComponent<Health>().OnHurt += HurtVisualEffect;
             m_coroutineStatus = false;
+            m_defaultFlipX = (group & GameManager.Instance.SYWS) != 0;
         }
 
         public void Uninitialize()
