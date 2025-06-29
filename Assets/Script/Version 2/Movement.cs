@@ -12,7 +12,7 @@ namespace Assets.Version2
 
         [SerializeField] private float m_stopDistance = 0.1f;
 
-        public void MoveTo(Vector3 targetPosition, float targetDistance, float deltaTime)
+        public void Move(Vector3 targetPosition, float targetDistance, float deltaTime)
         {
             if (m_stopDistance > targetDistance)
             {

@@ -12,7 +12,7 @@ namespace Assets.Version2
 
         void IDamageable.TakeDamage(float point)
         {
-            m_currentHP = Mathf.Clamp(m_currentHP + point, 0f, m_maxHP);
+            m_currentHP = Mathf.Clamp(m_currentHP - point, 0f, m_maxHP);
 
             if (m_currentHP <= 0f)
             {

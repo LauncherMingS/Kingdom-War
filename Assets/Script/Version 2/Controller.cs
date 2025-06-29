@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,6 @@ namespace Assets.Version2
         [SerializeField] private Command m_currentCommand = Command.None;
 
         [Header("Position Data")]
-        [SerializeField] private Vector3 m_currentIndicationPosition;
         [SerializeField] private Vector3 m_enemyBasePosition;
         [SerializeField] private Vector3 m_retreatPosition;
 
@@ -23,18 +23,21 @@ namespace Assets.Version2
 
         public Command CurrentCommand => m_currentCommand;
 
-        //Button Listener
+        //Button Listener(Command)
         public void SwitchCommand(int newCommandFlag)
         {
-            if (newCommandFlag > 3)
+            if (!Enum.IsDefined(typeof(Command), newCommandFlag))
             {
-                throw new System.Exception("Command flag can not be greater than 3.");
+#if UNITY_EDITOR
+                Debug.LogWarning(gameObject.name + ": newCommandFlag " + newCommandFlag + " is not defind.");
+#endif
+                return;
             }
 
             SwitchCommand((Command)newCommandFlag);
         }
 
-        public void SwitchCommand(Command newCommand)
+        private void SwitchCommand(Command newCommand)
         {
             if (newCommand == m_currentCommand)
             {
@@ -42,53 +45,41 @@ namespace Assets.Version2
             }
 
             m_currentCommand = newCommand;
-            switch (m_currentCommand)
-            {
-                case Command.Attack:
-                    m_currentIndicationPosition = m_enemyBasePosition;
-                    break;
-                case Command.Defend:
-                    LineUp();
-                    return;
-                case Command.Retreat:
-                    m_currentIndicationPosition = m_retreatPosition;
-                    break;
-                default:
-                    m_currentIndicationPosition = Vector3.zero;
-                    break;
-            }
 
-            for (int i = 0;i <  m_units.Count;i++)
+            if (m_currentCommand == Command.Defend)
             {
-                m_units[i].SetDefaultPosition = m_currentIndicationPosition;
+                LineUp();
             }
         }
 
-        public void LineUp()
+        private void LineUp(int startIndex = 0)
         {
-            if (m_units.Count == 0)
+            if (m_units.Count == 0 || startIndex >= m_units.Count)
             {
+#if UNITY_EDITOR
+                Debug.LogWarning(gameObject.name + ": units list is empty or startIndex is greater than list count.");
+#endif
                 return;
             }
 
-            int t_currentRow = 0;
-            int t_remainUnitCount = m_units.Count;
+            int t_currentRow = startIndex / m_maxUnitPerRow;
+            int t_remainUnitCount = m_units.Count - (t_currentRow * m_maxUnitPerRow);
             Vector3 t_unitPosition = Vector3.zero;
             while (t_remainUnitCount > 0)
             {
-                int t_unitCountThisRow = (t_remainUnitCount > m_maxUnitPerRow) 
+                int t_unitCountThisRow = (t_remainUnitCount > m_maxUnitPerRow)
                     ? m_maxUnitPerRow : t_remainUnitCount;
 
-                int t_rowStartIndex = t_currentRow * m_maxUnitPerRow;
+                int t_thisRowStartIndex = t_currentRow * m_maxUnitPerRow;
                 t_unitPosition.x = t_currentRow * m_commonDifferenceX + m_beginX;
                 for (int i = 0; i < t_unitCountThisRow; i++)
                 {
                     t_unitPosition.z = m_totalLengthZ * (i + 1) / (t_unitCountThisRow + 1);
 
-                    int t_unitIndex = t_rowStartIndex + i;
+                    int t_unitIndex = t_thisRowStartIndex + i;
                     if (t_unitIndex < m_units.Count)
                     {
-                        m_units[t_unitIndex].SetDefaultPosition = t_unitPosition;
+                        m_units[t_unitIndex].DefensePosition = t_unitPosition;
                     }
                 }
 
@@ -97,40 +88,13 @@ namespace Assets.Version2
             }
         }
 
-        public void LineUpLastRow()
-        {
-            if (m_units.Count == 0)
-            {
-                return;
-            }
-
-            int t_lastRowIndex = m_units.Count / m_maxUnitPerRow;
-            int t_unitCountLastRow = m_units.Count % m_maxUnitPerRow;
-            if (t_unitCountLastRow == 0)
-            {
-                t_lastRowIndex--;
-                t_unitCountLastRow = m_maxUnitPerRow;
-            }
-
-            int t_rowStartIndex = t_lastRowIndex * m_maxUnitPerRow;
-            Vector3 t_unitPosition = Vector3.zero;
-            t_unitPosition.x = t_lastRowIndex * m_commonDifferenceX + m_beginX;
-            for (int i = 0;i < t_unitCountLastRow;i++)
-            {
-                t_unitPosition.z = m_totalLengthZ * (i + 1) / (t_unitCountLastRow + 1);
-
-                int t_unitIndex = t_rowStartIndex + i;
-                if (t_unitIndex < m_units.Count)
-                {
-                    m_units[t_unitIndex].SetDefaultPosition = t_unitPosition;
-                }
-            }
-        }
-
         public void AddUnit(Unit unit)
         {
+            unit.EnemyBasePosition = m_enemyBasePosition;
+            unit.RetreatPosition = m_retreatPosition;
+
             m_units.Add(unit);
-            LineUpLastRow();
+            LineUp(m_units.Count - 1);
         }
 
         private void Start()
