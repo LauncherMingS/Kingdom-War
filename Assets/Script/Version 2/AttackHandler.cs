@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public class Interaction : MonoBehaviour
+    public class AttackHandler : MonoBehaviour
     {
         [SerializeField] private Transform m_target;
 

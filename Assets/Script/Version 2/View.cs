@@ -90,9 +90,9 @@ namespace Assets.Version2
             t_movePlayable.SetSpeed(6d);
             t_attackPlayable.SetDuration((double)m_attackClip.length);
             t_attackPlayable.SetSpeed(1.5d);
-            m_playableGraph.Connect(t_idlePlayable, 0, m_mixerPlayable, (int)Unit.UnitState.Idle);
-            m_playableGraph.Connect(t_movePlayable, 0, m_mixerPlayable, (int)Unit.UnitState.Move);
-            m_playableGraph.Connect(t_attackPlayable, 0, m_mixerPlayable, (int)Unit.UnitState.Attack);
+            m_playableGraph.Connect(t_idlePlayable, 0, m_mixerPlayable, (int)SwordMan.UnitState.Idle);
+            m_playableGraph.Connect(t_movePlayable, 0, m_mixerPlayable, (int)SwordMan.UnitState.Move);
+            m_playableGraph.Connect(t_attackPlayable, 0, m_mixerPlayable, (int)SwordMan.UnitState.Attack);
 
             SwitchAnimation(0, 1);
 

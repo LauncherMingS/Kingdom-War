@@ -11,7 +11,7 @@ namespace Assets.Version2
         public void Recruit()
         {
             GameObject t_gameObject = Instantiate(m_infantryPrefab, transform.position, Quaternion.identity);
-            Unit t_unit = t_gameObject.GetComponent<Unit>();
+            SwordMan t_unit = t_gameObject.GetComponent<SwordMan>();
             t_unit.SetController = m_controller;
 
             m_controller.AddUnit(t_unit);

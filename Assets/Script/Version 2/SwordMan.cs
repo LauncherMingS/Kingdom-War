@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public class Unit : MonoBehaviour
+    public class SwordMan : MonoBehaviour
     {
         [SerializeField] private Controller m_controller;
 
@@ -18,11 +18,11 @@ namespace Assets.Version2
         [Header("Component Reference")]
         [SerializeField] private Health m_health;
 
-        [SerializeField] private Interaction m_interaction;
+        [SerializeField] private AttackHandler m_attackHandler;
 
         [SerializeField] private Movement m_movement;
 
-        [SerializeField] private Detector m_detector;
+        [SerializeField] private DetectionHandler m_detectionHandler;
 
         [SerializeField] private View m_view;
 
@@ -61,9 +61,9 @@ namespace Assets.Version2
         private void TryAttackTarget(Transform target)
         {
             SwitchUnitState(UnitState.Attack);
-            if (m_interaction.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
+            if (m_attackHandler.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
             {
-                m_interaction.SetTarget(target);
+                m_attackHandler.SetTarget(target);
                 m_view.ResetAnimation((int)m_currentState);
             }
         }
@@ -87,7 +87,7 @@ namespace Assets.Version2
         private void HandleAttackCommand(float deltaTime)
         {
             float t_detectionRadius = GetDetectionRadiusByCommand(m_controller.CurrentCommand);
-            Transform t_target = m_detector.DetectClosestTarget(t_detectionRadius, out float t_targetSquaredDistance);
+            Transform t_target = m_detectionHandler.DetectClosestTarget(t_detectionRadius, out float t_targetSquaredDistance);
             Vector3 t_targetPosition;
             float t_targetDistance;
             if (t_target != null)
@@ -104,7 +104,7 @@ namespace Assets.Version2
 
             m_view.Face(t_targetPosition.x, m_group);
 
-            if (t_target != null && m_interaction.Range >= t_targetDistance)
+            if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
                 TryAttackTarget(t_target);
             }
@@ -137,7 +137,7 @@ namespace Assets.Version2
         private void Update()
         {
             float t_deltaTime = Time.deltaTime;
-            m_interaction.UpdateCD(t_deltaTime);
+            m_attackHandler.UpdateCD(t_deltaTime);
 
 
             switch (m_controller.CurrentCommand)
@@ -155,9 +155,9 @@ namespace Assets.Version2
         private void Start()
         {
             m_health.Initialize();
-            m_interaction.Initialize();
+            m_attackHandler.Initialize();
             m_movement.Initialize();
-            m_detector.Initialize(m_group);
+            m_detectionHandler.Initialize(m_group);
             m_view.Initialize();
         }
 

@@ -19,7 +19,7 @@ namespace Assets.Version2
         [SerializeField] private int m_maxUnitPerRow = 4;
 
         [Header("Unit List")]
-        [SerializeField] private List<Unit> m_units;
+        [SerializeField] private List<SwordMan> m_units;
 
         public Command CurrentCommand => m_currentCommand;
 
@@ -88,7 +88,7 @@ namespace Assets.Version2
             }
         }
 
-        public void AddUnit(Unit unit)
+        public void AddUnit(SwordMan unit)
         {
             unit.EnemyBasePosition = m_enemyBasePosition;
             unit.RetreatPosition = m_retreatPosition;

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public class Detector : MonoBehaviour
+    public class DetectionHandler : MonoBehaviour
     {
         private static readonly Collider[] detectedColliders = new Collider[64];
 
