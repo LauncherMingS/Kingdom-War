@@ -74,6 +74,16 @@ namespace Assets.Version2
             m_movement.Move(position, distance, deltaTime);
         }
 
+        private Vector3 GetDetectionCenterByCommand(Controller.Command command)
+        {
+            return command switch
+            {
+                Controller.Command.Attack => transform.position,
+                Controller.Command.Defend => m_defensePosition,
+                _ => Vector3.zero
+            };
+        }
+
         private float GetDetectionRadiusByCommand(Controller.Command command)
         {
             return command switch
@@ -86,8 +96,11 @@ namespace Assets.Version2
 
         private void HandleAttackCommand(float deltaTime)
         {
+            Vector3 t_detectionCenter = GetDetectionCenterByCommand(m_controller.CurrentCommand);
             float t_detectionRadius = GetDetectionRadiusByCommand(m_controller.CurrentCommand);
-            Transform t_target = m_detectionHandler.DetectClosestTarget(t_detectionRadius, out float t_targetSquaredDistance);
+
+            Transform t_target = m_detectionHandler.DetectClosestTarget(t_detectionCenter, t_detectionRadius
+                , out float t_targetSquaredDistance);
             Vector3 t_targetPosition;
             float t_targetDistance;
             if (t_target != null)

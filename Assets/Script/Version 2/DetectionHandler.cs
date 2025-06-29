@@ -8,10 +8,10 @@ namespace Assets.Version2
 
         [SerializeField] private int m_targetLayerMask;
 
-        public Transform DetectClosestTarget(float detectionRadius, out float targetSquaredDistance)
+        public Transform DetectClosestTarget(Vector3 position, float detectionRadius, out float targetSquaredDistance)
         {
-            int t_detectLength = Physics.OverlapSphereNonAlloc(transform.position
-                , detectionRadius, detectedColliders, m_targetLayerMask, QueryTriggerInteraction.Ignore);
+            int t_detectLength = Physics.OverlapSphereNonAlloc(position, detectionRadius, detectedColliders
+                , m_targetLayerMask, QueryTriggerInteraction.Ignore);
             Transform t_detectedTarget;
             Transform t_target = null;
             float t_squaredDistance;
