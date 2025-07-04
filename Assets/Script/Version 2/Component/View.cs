@@ -7,27 +7,32 @@ namespace Assets.Version2
 {
     public class View : MonoBehaviour
     {
-        [Header("Sprite Renderer")]
-        [SerializeField] private SpriteRenderer[] m_spriteRenderer;
+        [Header("Parameter")]
+        [Header("Hurt Flash")]
         [SerializeField] private float m_hurtFlashDuration = 0.35f;
-        [SerializeField] private IEnumerator m_coroutine;
-        [SerializeField] private bool m_coroutineStatus;
+        [SerializeField] private bool m_hurtFlashStatus;
+        [Header("Flip")]
         [SerializeField] private bool m_defaultFlipX;
         [SerializeField] private bool m_currentFlipX = false;
+        [Header("Animation Blend")]
+        [SerializeField] private float m_blendDuration = 0.5f;
+        [SerializeField] private int m_currentState;
+        [SerializeField] private int m_nextState;
+        [SerializeField] private bool m_blendAnimationStatus;
 
-        [Header("Animation")]
-        [SerializeField] private PlayableGraph m_playableGraph;
-        [SerializeField] private AnimationMixerPlayable m_mixerPlayable;
-        [SerializeField] private AnimationMixerPlayable m_flipMixerPlayable;
+        [Header("Component Reference")]
+        [SerializeField] private SpriteRenderer[] m_spriteRenderer;
+        [Header("Asset Reference")]
         [SerializeField] private AnimationClip m_attackClip;
         [SerializeField] private AnimationClip m_idleClip;
         [SerializeField] private AnimationClip m_moveClip;
-        [SerializeField] private AnimationClip m_flipXTrue;
-        [SerializeField] private AnimationClip m_flipXFalse;
-        [SerializeField] private float m_duration = 0.5f;
-        [SerializeField] private int m_currentState;
-        [SerializeField] private int m_nextState;
-        [SerializeField] private bool m_blendStatus;
+        [SerializeField] private AnimationClip m_flipXTrueClip;
+        [SerializeField] private AnimationClip m_flipXFalseClip;
+
+        [SerializeField] private PlayableGraph m_graph;
+        [SerializeField] private AnimationMixerPlayable m_mainMixer;
+        [SerializeField] private AnimationMixerPlayable m_flipMixer;
+        [SerializeField] private IEnumerator m_hurtFlash;
         [SerializeField] private IEnumerator m_blendAnimation;
 
         public void Face(float positionX)
@@ -48,28 +53,28 @@ namespace Assets.Version2
             }
 
             int t_input = (t_face) ? 1 : 0;
-            m_flipMixerPlayable.SetInputWeight(t_input ^ 1, 0f);
-            m_flipMixerPlayable.SetInputWeight(t_input, 1f);
-            m_flipMixerPlayable.GetInput(t_input).SetTime(0d);
-            m_flipMixerPlayable.GetInput(t_input).SetDone(false);
+            m_flipMixer.SetInputWeight(t_input ^ 1, 0f);
+            m_flipMixer.SetInputWeight(t_input, 1f);
+            m_flipMixer.GetInput(t_input).SetTime(0d);
+            m_flipMixer.GetInput(t_input).SetDone(false);
 
             m_currentFlipX = t_face;
         }
 
         public void HurtVisualEffect(float point)
         {
-            if (m_coroutineStatus)
+            if (m_hurtFlashStatus)
             {
-                StopCoroutine(m_coroutine);
+                StopCoroutine(m_hurtFlash);
             }
 
-            m_coroutine = HurtFlash();
-            StartCoroutine(m_coroutine);
+            m_hurtFlash = HurtFlash();
+            StartCoroutine(m_hurtFlash);
         }
 
         private IEnumerator HurtFlash()
         {
-            m_coroutineStatus = true;
+            m_hurtFlashStatus = true;
 
             int t_length = m_spriteRenderer.Length;
             for (int i = 0; i < t_length; i++)
@@ -82,34 +87,34 @@ namespace Assets.Version2
                 m_spriteRenderer[i].color = Color.white;
             }
 
-            m_coroutineStatus = false;
+            m_hurtFlashStatus = false;
         }
 
         private IEnumerator BlendAnimation()
         {
-            m_blendStatus = true;
+            m_blendAnimationStatus = true;
 
             float t_time = 0f;
 
-            while(t_time < m_duration)
+            while(t_time < m_blendDuration)
             {
                 t_time += Time.deltaTime;
-                float t_weight = t_time / m_duration;
+                float t_weight = t_time / m_blendDuration;
 
-                m_mixerPlayable.SetInputWeight(m_currentState, 1f - t_weight);
-                m_mixerPlayable.SetInputWeight(m_nextState, t_weight);
+                m_mainMixer.SetInputWeight(m_currentState, 1f - t_weight);
+                m_mainMixer.SetInputWeight(m_nextState, t_weight);
                 yield return null;
             }
 
-            m_mixerPlayable.SetInputWeight(m_currentState, 0f);
-            m_mixerPlayable.SetInputWeight(m_nextState, 1f);
+            m_mainMixer.SetInputWeight(m_currentState, 0f);
+            m_mainMixer.SetInputWeight(m_nextState, 1f);
 
-            m_blendStatus = false;
+            m_blendAnimationStatus = false;
         }
 
         public bool AnimationIsDone(int unitState)
         {
-            return m_mixerPlayable.GetInput(unitState).IsDone();
+            return m_mainMixer.GetInput(unitState).IsDone();
         }
 
         public void SwitchAnimation(int newState, int originState)
@@ -119,11 +124,11 @@ namespace Assets.Version2
                 return;
             }
 
-            if (m_blendStatus)
+            if (m_blendAnimationStatus)
             {
                 StopCoroutine(m_blendAnimation);
-                m_mixerPlayable.SetInputWeight(m_currentState, 0f);
-                m_mixerPlayable.SetInputWeight(m_nextState, 1f);
+                m_mainMixer.SetInputWeight(m_currentState, 0f);
+                m_mainMixer.SetInputWeight(m_nextState, 1f);
             }
 
             m_currentState = originState;
@@ -134,8 +139,8 @@ namespace Assets.Version2
 
         public void ResetAnimation(int currentState)
         {
-            m_mixerPlayable.GetInput(currentState).SetTime(0d);
-            m_mixerPlayable.GetInput(currentState).SetDone(false);
+            m_mainMixer.GetInput(currentState).SetTime(0d);
+            m_mainMixer.GetInput(currentState).SetDone(false);
         }
 
         public void Initialize(int group)
@@ -144,54 +149,48 @@ namespace Assets.Version2
             Animator t_animator = GetComponent<Animator>();
             t_animator.cullingMode = AnimatorCullingMode.CullCompletely;
 
-            m_playableGraph = PlayableGraph.Create("Infantry Graph");
-            m_playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
+            m_graph = PlayableGraph.Create("Infantry Graph");
+            m_graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
 
-            AnimationPlayableOutput t_playableOutput = AnimationPlayableOutput.Create(m_playableGraph, "Infantry Output", t_animator);
+            AnimationClipPlayable t_idle = AnimationClipPlayable.Create(m_graph, m_idleClip);
+            AnimationClipPlayable t_move = AnimationClipPlayable.Create(m_graph, m_moveClip);
+            AnimationClipPlayable t_attack = AnimationClipPlayable.Create(m_graph, m_attackClip);
+            t_idle.SetSpeed(0.5d);
+            t_attack.SetDuration((double)m_attackClip.length);
 
-            m_mixerPlayable = AnimationMixerPlayable.Create(m_playableGraph, 3);
-            t_playableOutput.SetSourcePlayable(m_mixerPlayable);
+            m_mainMixer = AnimationMixerPlayable.Create(m_graph, 3);
+            m_graph.Connect(t_idle, 0, m_mainMixer, (int)SwordMan.UnitState.Idle);
+            m_graph.Connect(t_move, 0, m_mainMixer, (int)SwordMan.UnitState.Move);
+            m_graph.Connect(t_attack, 0, m_mainMixer, (int)SwordMan.UnitState.Attack);
 
-            AnimationClipPlayable t_idlePlayable = AnimationClipPlayable.Create(m_playableGraph, m_idleClip);
-            AnimationClipPlayable t_movePlayable = AnimationClipPlayable.Create(m_playableGraph, m_moveClip);
-            AnimationClipPlayable t_attackPlayable = AnimationClipPlayable.Create(m_playableGraph, m_attackClip);
-            t_idlePlayable.SetSpeed(0.5d);
-            //t_movePlayable.SetSpeed(0.5d);
-            t_attackPlayable.SetDuration((double)m_attackClip.length);
-            //t_movePlayable.SetSpeed(6d);
-            //t_attackPlayable.SetDuration((double)m_attackClip.length);
-            //t_attackPlayable.SetSpeed(1.5d);
-            m_playableGraph.Connect(t_idlePlayable, 0, m_mixerPlayable, (int)SwordMan.UnitState.Idle);
-            m_playableGraph.Connect(t_movePlayable, 0, m_mixerPlayable, (int)SwordMan.UnitState.Move);
-            m_playableGraph.Connect(t_attackPlayable, 0, m_mixerPlayable, (int)SwordMan.UnitState.Attack);
+            AnimationPlayableOutput t_mainOutput = AnimationPlayableOutput.Create(m_graph, "Infantry Output", t_animator);
+            t_mainOutput.SetSourcePlayable(m_mainMixer);
 
 
-            AnimationClipPlayable t_flipXTrue = AnimationClipPlayable.Create(m_playableGraph, m_flipXTrue);
-            AnimationClipPlayable t_flipXFalse = AnimationClipPlayable.Create(m_playableGraph, m_flipXFalse);
+            AnimationClipPlayable t_flipXTrue = AnimationClipPlayable.Create(m_graph, m_flipXTrueClip);
+            AnimationClipPlayable t_flipXFalse = AnimationClipPlayable.Create(m_graph, m_flipXFalseClip);
             t_flipXTrue.SetSpeed(2f);
             t_flipXFalse.SetSpeed(2f);
 
-            m_flipMixerPlayable = AnimationMixerPlayable.Create(m_playableGraph, 2);
-            m_playableGraph.Connect(t_flipXFalse, 0, m_flipMixerPlayable, 0);
-            m_playableGraph.Connect(t_flipXTrue, 0, m_flipMixerPlayable, 1);
+            m_flipMixer = AnimationMixerPlayable.Create(m_graph, 2);
+            m_graph.Connect(t_flipXFalse, 0, m_flipMixer, 0);
+            m_graph.Connect(t_flipXTrue, 0, m_flipMixer, 1);
 
-            AnimationPlayableOutput t_flipOutput = AnimationPlayableOutput.Create(m_playableGraph, "Infantry Output", t_animator);
-            t_flipOutput.SetSourcePlayable(m_flipMixerPlayable);
+            AnimationPlayableOutput t_flipOutput = AnimationPlayableOutput.Create(m_graph, "Infantry Output", t_animator);
+            t_flipOutput.SetSourcePlayable(m_flipMixer);
 
-            SwitchAnimation(0, 1);
-
-            m_playableGraph.Play();
+            m_graph.Play();
             #endregion
 
-            GetComponent<Health>().OnHurt += HurtVisualEffect;
-            m_coroutineStatus = false;
+            m_hurtFlashStatus = false;
             m_defaultFlipX = (group & GameManager.Instance.SYWS) != 0;
+            GetComponent<Health>().OnHurt += HurtVisualEffect;
         }
 
         public void Uninitialize()
         {
+            m_graph.Destroy();
             GetComponent<Health>().OnHurt -= HurtVisualEffect;
-            m_playableGraph.Destroy();
         }
     }
 }

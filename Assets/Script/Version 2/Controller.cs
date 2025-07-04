@@ -7,17 +7,14 @@ namespace Assets.Version2
     public class Controller : MonoBehaviour
     {
         [SerializeField] private Command m_currentCommand = Command.None;
-
-        [Header("Position Data")]
-        [SerializeField] private Vector3 m_enemyBasePosition;
-        [SerializeField] private Vector3 m_retreatPosition;
-
-        [Header("Line Up Data")]
+        [Header("Line Up")]
         [SerializeField] private float m_beginX = -10f;
         [SerializeField] private float m_commonDifferenceX = -3f;
         [SerializeField] private float m_totalLengthZ = 12f;
         [SerializeField] private int m_maxUnitPerRow = 4;
-
+        [Header("Position")]
+        [SerializeField] private Vector3 m_enemyBasePosition;
+        [SerializeField] private Vector3 m_retreatPosition;
         [Header("Unit List")]
         [SerializeField] private List<SwordMan> m_units;
 

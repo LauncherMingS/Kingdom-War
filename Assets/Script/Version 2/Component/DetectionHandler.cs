@@ -10,13 +10,14 @@ namespace Assets.Version2
 
         public Transform DetectClosestTarget(Vector3 position, float detectionRadius, out float targetSquaredDistance)
         {
-            int t_detectLength = Physics.OverlapSphereNonAlloc(position, detectionRadius, detectedColliders
-                , m_targetLayerMask, QueryTriggerInteraction.Ignore);
-            Transform t_detectedTarget;
             Transform t_target = null;
-            float t_squaredDistance;
             targetSquaredDistance = float.MaxValue;
 
+            int t_detectLength = Physics.OverlapSphereNonAlloc(position, detectionRadius, detectedColliders
+                , m_targetLayerMask, QueryTriggerInteraction.Ignore);
+
+            Transform t_detectedTarget;
+            float t_squaredDistance;
             for (int i = 0;i < t_detectLength;i++)
             {
                 t_detectedTarget = detectedColliders[i].transform;

@@ -4,12 +4,16 @@ namespace Assets.Version2
 {
     public class AttackHandler : MonoBehaviour
     {
+        [Header("Game Reference")]
         [SerializeField] private Transform m_target;
 
+        [Header("Attack Point")]
         [SerializeField] private float m_basePoint = 3f;
         [SerializeField] private float m_currentPoint;
+        [Header("Attack Cool Down")]
         [SerializeField] private float m_baseCD = 2.5f;
         [SerializeField] private float m_currentCD;
+        [Header("Attack Range")]
         [SerializeField] private float m_range = 2f;
 
         public float CurrentCD => m_currentCD;

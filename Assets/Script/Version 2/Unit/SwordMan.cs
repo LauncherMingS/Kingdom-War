@@ -4,26 +4,26 @@ namespace Assets.Version2
 {
     public class SwordMan : MonoBehaviour
     {
+        [Header("Game Reference")]
         [SerializeField] private Controller m_controller;
 
-        [Header("Data")]
+        [Header("Parameter")]
+        [Header("Basics")]
         [SerializeField] private UnitState m_currentState = UnitState.Idle;
         [SerializeField] private int m_group;//LayerMask
+        [Header("Detection")]
+        [SerializeField] private float m_attackDetectionRadius = 5f;
+        [SerializeField] private float m_defenseDetectionRadius = 3f;
+        [Header("Position")]
         [SerializeField] private Vector3 m_enemyBasePosition;
         [SerializeField] private Vector3 m_defensePosition;
         [SerializeField] private Vector3 m_retreatPosition;
-        [SerializeField] private float m_attackDetectionRadius = 5f;
-        [SerializeField] private float m_defenseDetectionRadius = 3f;
 
         [Header("Component Reference")]
-        [SerializeField] private Health m_health;
-
         [SerializeField] private AttackHandler m_attackHandler;
-
-        [SerializeField] private Movement m_movement;
-
         [SerializeField] private DetectionHandler m_detectionHandler;
-
+        [SerializeField] private Health m_health;
+        [SerializeField] private Movement m_movement;
         [SerializeField] private View m_view;
 
         public Controller SetController
@@ -98,9 +98,9 @@ namespace Assets.Version2
         {
             Vector3 t_detectionCenter = GetDetectionCenterByCommand(m_controller.CurrentCommand);
             float t_detectionRadius = GetDetectionRadiusByCommand(m_controller.CurrentCommand);
-
             Transform t_target = m_detectionHandler.DetectClosestTarget(t_detectionCenter, t_detectionRadius
                 , out float t_targetSquaredDistance);
+
             Vector3 t_targetPosition;
             float t_targetDistance;
             if (t_target != null)

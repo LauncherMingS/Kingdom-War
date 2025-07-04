@@ -1,148 +1,184 @@
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Playables;
-using UnityEngine.PlayerLoop;
-using UnityEngine.UIElements;
+using static Assets.Version2.SwordMan;
 
 namespace Assets.Version2
 {
     public class Archer : MonoBehaviour
     {
-        [Header("Reference")]
+        [Header("Game Reference")]
         [SerializeField] private Controller m_controller;
 
-        [Header("Component")]
-        [SerializeField] private Health m_health;
-        [SerializeField] private Movement m_movement;
-        [SerializeField] private DetectionHandler m_detectionHandler;
-        [SerializeField] private View m_view;
-
-        [Header("Data")]
+        [Header("Parameter")]
+        [Header("Basics")]
+        [SerializeField] private UnitState m_currentState = UnitState.Idle;
         [SerializeField] private int m_group;
+        [Header("Detection")]
         [SerializeField] private float m_attackDetectionRadius;
         [SerializeField] private float m_defenseDetectionRadius;
-
+        [Header("Position")]
         [SerializeField] private Vector3 m_enemyBasePosition;
         [SerializeField] private Vector3 m_defensePosition;
         [SerializeField] private Vector3 m_retreatPosition;
-                    
 
-        private void Update()
+        [Header("Component Reference")]
+        [SerializeField] private AttackHandler m_attackHandler;
+        [SerializeField] private DetectionHandler m_detectionHandler;
+        [SerializeField] private Health m_health;
+        [SerializeField] private Movement m_movement;
+        [SerializeField] private View m_view;
+
+
+        public Controller SetController
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                SwitchState(0);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                SwitchState(1);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                SwitchState(2);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                FlipAnimation();
-            }
+            set => m_controller = value;
         }
 
-        [SerializeField] private int m_currentState = 0;
-        [SerializeField] private bool m_currentFlip = false;
-        [SerializeField] private Animator m_animator;
-        [SerializeField] private PlayableGraph m_playableGraph;
-
-        [SerializeField] private AnimationMixerPlayable m_mixerPlayable;
-        [SerializeField] private AnimationMixerPlayable m_flipMixerPlayable;
-
-        [SerializeField] private AnimationClip m_idleClip;
-        [SerializeField] private AnimationClip m_moveClip;
-        [SerializeField] private AnimationClip m_attackClip;
-
-        [SerializeField] private AnimationClip m_flipXTrueClip;
-        [SerializeField] private AnimationClip m_flipXFalseClip;
-
-
-        private void Start()
+        public Vector3 EnemyBasePosition
         {
-            m_animator.cullingMode = AnimatorCullingMode.CullCompletely;
-
-            m_playableGraph = PlayableGraph.Create("Archer Graph");
-            m_playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
-
-            AnimationPlayableOutput t_playableOutput = AnimationPlayableOutput.Create(m_playableGraph, "Archer Output", m_animator);
-            AnimationPlayableOutput t_flipPlayableOutput = AnimationPlayableOutput.Create(m_playableGraph, "Flip Output", m_animator);
-
-            m_mixerPlayable = AnimationMixerPlayable.Create(m_playableGraph, 3);
-
-            AnimationClipPlayable t_idlePlayable = AnimationClipPlayable.Create(m_playableGraph, m_idleClip);
-            AnimationClipPlayable t_movePlayable = AnimationClipPlayable.Create(m_playableGraph, m_moveClip);
-            AnimationClipPlayable t_attackPlayable = AnimationClipPlayable.Create(m_playableGraph, m_attackClip);
-            t_idlePlayable.SetSpeed(0.5d);
-            t_attackPlayable.SetSpeed(0.5d);
-            m_playableGraph.Connect(t_idlePlayable, 0, m_mixerPlayable, 0);
-            m_playableGraph.Connect(t_movePlayable, 0, m_mixerPlayable, 1);
-            m_playableGraph.Connect(t_attackPlayable, 0, m_mixerPlayable, 2);
-            t_playableOutput.SetSourcePlayable(m_mixerPlayable);
-
-            m_flipMixerPlayable = AnimationMixerPlayable.Create(m_playableGraph, 2);
-
-            AnimationClipPlayable t_flipXTruePlayable = AnimationClipPlayable.Create(m_playableGraph, m_flipXTrueClip);
-            AnimationClipPlayable t_flipXFalsePlayable = AnimationClipPlayable.Create(m_playableGraph, m_flipXFalseClip);
-            m_playableGraph.Connect(t_flipXTruePlayable, 0, m_flipMixerPlayable, 0);
-            m_playableGraph.Connect(t_flipXFalsePlayable, 0, m_flipMixerPlayable, 1);
-            t_flipPlayableOutput.SetSourcePlayable(m_flipMixerPlayable);
-
-            SwitchAnimation(0, 1);
-
-            m_playableGraph.Play();
-
-            //m_health.Initialize();
-            //m_movement.Initialize();
-            //m_detectionHandler.Initialize(m_group);
-            //m_view.Initialize(m_group);
+            set => m_enemyBasePosition = value;
         }
 
-        public void SwitchState(int newState)
+        public Vector3 DefensePosition
         {
-            if (m_currentState == newState)
+            set => m_defensePosition = value;
+        }
+
+        public Vector3 RetreatPosition
+        {
+            set => m_retreatPosition = value;
+        }
+
+        //Switch unit's state and animation
+        public void SwitchUnitState(UnitState newUnitState)
+        {
+            if (m_currentState == newUnitState)
             {
                 return;
             }
 
-            SwitchAnimation(newState, m_currentState);
-            m_currentState = newState;
+            m_view.SwitchAnimation((int)newUnitState, (int)m_currentState);
+            m_currentState = newUnitState;
         }
 
-        public void FlipAnimation()
+        private void TryAttackTarget(Transform target)
         {
-            int t_index = (!m_currentFlip) ? 1 : 0;
-            int t_indexReverse = (m_currentFlip) ? 1 : 0;
-            m_flipMixerPlayable.SetInputWeight(t_indexReverse, 0f);
-            m_flipMixerPlayable.SetInputWeight(t_index, 1f);
-            m_flipMixerPlayable.GetInput(t_index).SetTime(0d);
-            m_flipMixerPlayable.GetInput(t_index).SetDone(false);
-
-            m_currentFlip = !m_currentFlip;
+            SwitchUnitState(UnitState.Attack);
+            if (m_attackHandler.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
+            {
+                m_attackHandler.SetTarget(target);
+                m_view.ResetAnimation((int)m_currentState);
+            }
         }
 
-        public void SwitchAnimation(int newState, int originState)
+        private void MoveTo(Vector3 position, float distance, float deltaTime)
         {
-            m_mixerPlayable.SetInputWeight(originState, 0f);
-            m_mixerPlayable.SetInputWeight(newState, 1f);
+            SwitchUnitState(UnitState.Move);
+            m_movement.Move(position, distance, deltaTime);
         }
 
-        public void ResetAnimation(int currentState)
+        private Vector3 GetDetectionCenterByCommand(Controller.Command command)
         {
-            m_mixerPlayable.GetInput(currentState).SetTime(0d);
-            m_mixerPlayable.GetInput(currentState).SetDone(false);
+            return command switch
+            {
+                Controller.Command.Attack => transform.position,
+                Controller.Command.Defend => m_defensePosition,
+                _ => Vector3.zero
+            };
+        }
+
+        private float GetDetectionRadiusByCommand(Controller.Command command)
+        {
+            return command switch
+            {
+                Controller.Command.Attack => m_attackDetectionRadius,
+                Controller.Command.Defend => m_defenseDetectionRadius,
+                _ => 0f
+            };
+        }
+
+        private void HandleAttackCommand(float deltaTime)
+        {
+            Vector3 t_detectionCenter = GetDetectionCenterByCommand(m_controller.CurrentCommand);
+            float t_detectionRadius = GetDetectionRadiusByCommand(m_controller.CurrentCommand);
+            Transform t_target = m_detectionHandler.DetectClosestTarget(t_detectionCenter, t_detectionRadius
+                , out float t_targetSquaredDistance);
+
+            Vector3 t_targetPosition;
+            float t_targetDistance;
+            if (t_target != null)
+            {
+                t_targetPosition = t_target.position;
+                t_targetDistance = Mathf.Sqrt(t_targetSquaredDistance);
+            }
+            else
+            {
+                t_targetPosition = (m_controller.CurrentCommand == Controller.Command.Attack)
+                    ? m_enemyBasePosition : m_defensePosition;
+                t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
+            }
+
+            m_view.Face(t_targetPosition.x);
+
+            if (t_target != null && m_attackHandler.Range >= t_targetDistance)
+            {
+                TryAttackTarget(t_target);
+            }
+            else if (t_targetDistance > 0f)
+            {
+                MoveTo(t_targetPosition, t_targetDistance, deltaTime);
+            }
+            else
+            {
+                SwitchUnitState(UnitState.Idle);
+            }
+        }
+
+        private void HandleRetreatCommand(float deltaTime)
+        {
+            float t_targetDistance = Vector3.Distance(transform.position, m_retreatPosition);
+
+            m_view.Face(m_retreatPosition.x);
+
+            if (t_targetDistance > 0f)
+            {
+                MoveTo(m_retreatPosition, t_targetDistance, deltaTime);
+            }
+            else
+            {
+                SwitchUnitState(UnitState.Idle);
+            }
+        }
+
+        private void Update()
+        {
+            float t_deltaTime = Time.deltaTime;
+            m_attackHandler.UpdateCD(t_deltaTime);
+
+
+            switch (m_controller.CurrentCommand)
+            {
+                case Controller.Command.Attack:
+                case Controller.Command.Defend:
+                    HandleAttackCommand(t_deltaTime);
+                    return;
+                case Controller.Command.Retreat:
+                    HandleRetreatCommand(t_deltaTime);
+                    return;
+            }
+        }
+
+        private void Start()
+        {
+            m_health.Initialize();
+            m_attackHandler.Initialize();
+            m_movement.Initialize();
+            m_detectionHandler.Initialize(m_group);
+            m_view.Initialize(m_group);
         }
 
         private void OnDisable()
         {
             m_view.Uninitialize();
-            m_playableGraph.Destroy();
         }
     }
 }
