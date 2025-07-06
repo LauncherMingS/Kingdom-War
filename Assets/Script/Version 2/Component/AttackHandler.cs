@@ -48,6 +48,21 @@ namespace Assets.Version2
         {
             m_currentPoint = m_basePoint;
             m_currentCD = 0f;
+
+            //Make sure the central(script) does not have this component and exception happens like Swordman.
+            if (TryGetComponent(out ProjectileLauncher launcher))
+            {
+                launcher.OnLaunch += EnterCoolDown;
+            }
+        }
+
+        public void UnInitialize()
+        {
+            //Same as above.
+            if (TryGetComponent(out ProjectileLauncher launcher))
+            {
+                launcher.OnLaunch -= EnterCoolDown;
+            }
         }
     }
 }

@@ -7,16 +7,10 @@ namespace Assets.Version2
     {
         [Header("Game Reference")]
         [SerializeField] private Controller m_controller;
-        [SerializeField] private Transform m_launchPoint;
 
         [Header("Parameter")]
         [Header("Basics")]
         [SerializeField] private UnitState m_currentState = UnitState.Idle;
-        [Header("Launch Projectile")]
-        [SerializeField] private float m_projectileRadius = 0.5f;//get from projectile collider radius
-        [SerializeField] private float m_launchSpeed;
-        [SerializeField] private float m_launchDegree;
-        [SerializeField] private Vector2 m_launchVector;
         [Header("Detection")]
         [SerializeField] private float m_attackDetectionRadius;
         [SerializeField] private float m_defenseDetectionRadius;
@@ -30,10 +24,8 @@ namespace Assets.Version2
         [SerializeField] private DetectionHandler m_detectionHandler;
         [SerializeField] private Health m_health;
         [SerializeField] private Movement m_movement;
+        [SerializeField] private ProjectileLauncher m_launcher;
         [SerializeField] private View m_view;
-
-        [Header("Asset Reference")]
-        [SerializeField] private GameObject m_arrow;
 
 
         public Controller SetController
@@ -66,15 +58,6 @@ namespace Assets.Version2
 
             m_view.SwitchAnimation((int)newUnitState, (int)m_currentState);
             m_currentState = newUnitState;
-        }
-
-        //Trigger by Animation event in Attack Archer
-        private void LaunchProjectile()
-        {
-            Instantiate(m_arrow, m_launchPoint.position, Quaternion.identity, transform).GetComponent<Projectile>()
-                .Initialize(m_launchVector, m_attackHandler.CurrentPoint, m_detectionHandler.TargetLayer);
-
-            m_attackHandler.EnterCoolDown();
         }
 
         private void TryAttackTarget()
@@ -138,7 +121,7 @@ namespace Assets.Version2
             if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
                 float t_targetDistanceZ = Mathf.Abs(t_targetPosition.z - transform.position.z);
-                if (m_projectileRadius >= t_targetDistanceZ)
+                if (m_launcher.ProjectileRadius >= t_targetDistanceZ)
                 {
                     TryAttackTarget();
                     return;
@@ -193,20 +176,19 @@ namespace Assets.Version2
 
         private void Start()
         {
-            float t_radian = Mathf.Deg2Rad * m_launchDegree;
-            float t_velocityX = m_launchSpeed * Mathf.Cos(t_radian);
-            float t_velocityY = m_launchSpeed * Mathf.Sin(t_radian);
-            m_launchVector = new Vector2(t_velocityX, t_velocityY);
-
-            m_health.Initialize();
-            m_attackHandler.Initialize();
-            m_movement.Initialize();
             m_detectionHandler.Initialize();
+            m_health.Initialize();
+            m_movement.Initialize();
+            m_launcher.Initialize(m_detectionHandler.TargetLayer);
+            m_attackHandler.Initialize();
             m_view.Initialize();
+
+            m_launcher.AttackPoint = m_attackHandler.CurrentPoint;
         }
 
         private void OnDisable()
         {
+            m_attackHandler.UnInitialize();
             m_view.Uninitialize();
         }
     }
