@@ -19,7 +19,7 @@ namespace Assets.Version2
         [SerializeField] private Vector3 m_retreatPosition;
 
         [Header("Component Reference")]
-        [SerializeField] private AttackHandler m_attackHandler;
+        [SerializeField] private MeleeAttackHandler m_attackHandler;
         [SerializeField] private DetectionHandler m_detectionHandler;
         [SerializeField] private Health m_health;
         [SerializeField] private Movement m_movement;
@@ -166,8 +166,8 @@ namespace Assets.Version2
 
         private void Start()
         {
-            m_health.Initialize();
             m_attackHandler.Initialize();
+            m_health.Initialize();
             m_movement.Initialize();
             m_detectionHandler.Initialize();
             m_view.Initialize();

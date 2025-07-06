@@ -20,11 +20,10 @@ namespace Assets.Version2
         [SerializeField] private Vector3 m_retreatPosition;
 
         [Header("Component Reference")]
-        [SerializeField] private AttackHandler m_attackHandler;
+        [SerializeField] private RangedAttackHandler m_attackHandler;
         [SerializeField] private DetectionHandler m_detectionHandler;
         [SerializeField] private Health m_health;
         [SerializeField] private Movement m_movement;
-        [SerializeField] private ProjectileLauncher m_launcher;
         [SerializeField] private View m_view;
 
 
@@ -121,7 +120,7 @@ namespace Assets.Version2
             if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
                 float t_targetDistanceZ = Mathf.Abs(t_targetPosition.z - transform.position.z);
-                if (m_launcher.ProjectileRadius >= t_targetDistanceZ)
+                if (m_attackHandler.ProjectileRadius >= t_targetDistanceZ)
                 {
                     TryAttackTarget();
                     return;
@@ -177,18 +176,14 @@ namespace Assets.Version2
         private void Start()
         {
             m_detectionHandler.Initialize();
+            m_attackHandler.Initialize(m_detectionHandler.TargetLayer);
             m_health.Initialize();
             m_movement.Initialize();
-            m_launcher.Initialize(m_detectionHandler.TargetLayer);
-            m_attackHandler.Initialize();
             m_view.Initialize();
-
-            m_launcher.AttackPoint = m_attackHandler.CurrentPoint;
         }
 
         private void OnDisable()
         {
-            m_attackHandler.UnInitialize();
             m_view.Uninitialize();
         }
     }
