@@ -7,11 +7,18 @@ namespace Assets.Version2
     {
         [Header("Game Reference")]
         [SerializeField] private Controller m_controller;
+        [SerializeField] private Transform m_launchPoint;
 
         [Header("Parameter")]
         [Header("Basics")]
         [SerializeField] private UnitState m_currentState = UnitState.Idle;
-        [SerializeField] private int m_group;
+        [SerializeField] private int m_group;//LayerMask
+        [SerializeField] private int m_targetLayer;
+        [Header("Launch Projectile")]
+        [SerializeField] private float m_projectileRadius = 0.5f;//get from projectile collider radius
+        [SerializeField] private float m_launchSpeed;
+        [SerializeField] private float m_launchDegree;
+        [SerializeField] private Vector2 m_launchVector;
         [Header("Detection")]
         [SerializeField] private float m_attackDetectionRadius;
         [SerializeField] private float m_defenseDetectionRadius;
@@ -26,6 +33,9 @@ namespace Assets.Version2
         [SerializeField] private Health m_health;
         [SerializeField] private Movement m_movement;
         [SerializeField] private View m_view;
+
+        [Header("Asset Reference")]
+        [SerializeField] private GameObject m_arrow;
 
 
         public Controller SetController
@@ -60,12 +70,20 @@ namespace Assets.Version2
             m_currentState = newUnitState;
         }
 
-        private void TryAttackTarget(Transform target)
+        //Trigger by Animation event in Attack Archer
+        private void LaunchProjectile()
+        {
+            Instantiate(m_arrow, m_launchPoint.position, Quaternion.identity, transform).GetComponent<Projectile>()
+                .Initialize(m_launchVector, m_attackHandler.CurrentPoint, m_targetLayer);
+
+            m_attackHandler.EnterCoolDown();
+        }
+
+        private void TryAttackTarget()
         {
             SwitchUnitState(UnitState.Attack);
             if (m_attackHandler.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
             {
-                m_attackHandler.SetTarget(target);
                 m_view.ResetAnimation((int)m_currentState);
             }
         }
@@ -121,7 +139,15 @@ namespace Assets.Version2
 
             if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
-                TryAttackTarget(t_target);
+                float t_targetDistanceZ = Mathf.Abs(t_targetPosition.z - transform.position.z);
+                if (m_projectileRadius >= t_targetDistanceZ)
+                {
+                    TryAttackTarget();
+                    return;
+                }
+
+                t_targetPosition.x = transform.position.x;
+                MoveTo(t_targetPosition, t_targetDistance, deltaTime);
             }
             else if (t_targetDistance > 0f)
             {
@@ -169,11 +195,18 @@ namespace Assets.Version2
 
         private void Start()
         {
+            float t_radian = Mathf.Deg2Rad * m_launchDegree;
+            float t_velocityX = m_launchSpeed * Mathf.Cos(t_radian);
+            float t_velocityY = m_launchSpeed * Mathf.Sin(t_radian);
+            m_launchVector = new Vector2(t_velocityX, t_velocityY);
+
             m_health.Initialize();
             m_attackHandler.Initialize();
             m_movement.Initialize();
             m_detectionHandler.Initialize(m_group);
             m_view.Initialize(m_group);
+
+            m_targetLayer = (int)Mathf.Log(m_detectionHandler.TargetLayerMask, 2f);
         }
 
         private void OnDisable()

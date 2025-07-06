@@ -83,7 +83,7 @@ namespace Assets.TestUse
             Projectile t_projectile = Instantiate(m_projectile, transform.position, Quaternion.identity)
                 .GetComponent<Projectile>();
 
-            t_projectile.Initialize(velocityX, velocityY);
+            //t_projectile.Initialize(velocityX, velocityY);
         }
 
         //利用平行速度與計算好的拋物線整個過程的時間，計算落點，並標記

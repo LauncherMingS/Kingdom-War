@@ -16,6 +16,7 @@ namespace Assets.Version2
         [Header("Attack Range")]
         [SerializeField] private float m_range = 2f;
 
+        public float CurrentPoint => m_currentPoint;
         public float CurrentCD => m_currentCD;
         public float Range => m_range;
 
@@ -27,10 +28,15 @@ namespace Assets.Version2
             if (m_target != null && m_target.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
                 damageable.TakeDamage(m_currentPoint);
-                m_currentCD = m_baseCD;
+                EnterCoolDown();
             }
 
             m_target = null;
+        }
+
+        public void EnterCoolDown()
+        {
+            m_currentCD = m_baseCD;
         }
 
         public void UpdateCD(float deltaTime)

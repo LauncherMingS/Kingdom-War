@@ -8,6 +8,8 @@ namespace Assets.Version2
 
         [SerializeField] private int m_targetLayerMask;
 
+        public int TargetLayerMask => m_targetLayerMask;
+
         public Transform DetectClosestTarget(Vector3 position, float detectionRadius, out float targetSquaredDistance)
         {
             Transform t_target = null;

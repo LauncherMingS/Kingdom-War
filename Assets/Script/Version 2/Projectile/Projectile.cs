@@ -4,10 +4,14 @@ namespace Assets.Version2
 {
     public class Projectile : MonoBehaviour
     {
-        [SerializeField] private ProjectileMovement m_movement;
-
+        [Header("Parameter")]
         [SerializeField] private float m_lifetime = 3f;
         [SerializeField] private float m_timer;
+        [SerializeField] private float m_attackPoint;
+        [SerializeField] private int m_targetLayer;
+
+        [Header("Component Reference")]
+        [SerializeField] private ProjectileMovement m_movement;
 
 
         private void Check(float deltaTime)
@@ -28,10 +32,24 @@ namespace Assets.Version2
             Check(t_deltaTime);
         }
 
-        public void Initialize(float velocityX, float velocityY)
+        public void Initialize(Vector2 velocity, float attackPoint, int targetLayer)
         {
             m_timer = m_lifetime;
-            m_movement.Initialize(new Vector3(velocityX, velocityY, 0f));
+            m_attackPoint = attackPoint;
+            m_targetLayer = targetLayer;
+            m_movement.Initialize(new Vector3(velocity.x, velocity.y, 0f));
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.layer == m_targetLayer
+                && other.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                damageable.TakeDamage(m_attackPoint);
+
+                Destroy(gameObject);
+                return;
+            }
         }
     }
 }
