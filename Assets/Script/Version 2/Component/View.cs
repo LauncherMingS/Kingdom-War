@@ -143,9 +143,8 @@ namespace Assets.Version2
             m_mainMixer.GetInput(currentState).SetDone(false);
         }
 
-        public void Initialize(int group)
+        private void ConstructPlayable()
         {
-            #region Animation
             Animator t_animator = GetComponent<Animator>();
             t_animator.cullingMode = AnimatorCullingMode.CullCompletely;
 
@@ -180,11 +179,14 @@ namespace Assets.Version2
             t_flipOutput.SetSourcePlayable(m_flipMixer);
 
             m_graph.Play();
-            #endregion
+        }
 
+        public void Initialize()
+        {
             m_hurtFlashStatus = false;
-            m_defaultFlipX = (group & GameManager.Instance.SYWS) != 0;
+            m_defaultFlipX = GameManager.Instance.IsSYWS(gameObject.layer);
             GetComponent<Health>().OnHurt += HurtVisualEffect;
+            ConstructPlayable();
         }
 
         public void Uninitialize()

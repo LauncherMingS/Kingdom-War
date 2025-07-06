@@ -6,9 +6,10 @@ namespace Assets.Version2
     {
         private static readonly Collider[] detectedColliders = new Collider[64];
 
+        [SerializeField] private int m_targetLayer;
         [SerializeField] private int m_targetLayerMask;
 
-        public int TargetLayerMask => m_targetLayerMask;
+        public int TargetLayer => m_targetLayer;
 
         public Transform DetectClosestTarget(Vector3 position, float detectionRadius, out float targetSquaredDistance)
         {
@@ -34,10 +35,10 @@ namespace Assets.Version2
             return t_target;
         }
 
-        public void Initialize(int group)
+        public void Initialize()
         {
-            m_targetLayerMask = ((group & GameManager.Instance.SYWS) != 0)
-                ? GameManager.Instance.NLI : GameManager.Instance.SYWS;
+            m_targetLayer = GameManager.Instance.GetOppositeGroupLayer(gameObject.layer);
+            m_targetLayerMask = 1 << m_targetLayer;
         }
     }
 }

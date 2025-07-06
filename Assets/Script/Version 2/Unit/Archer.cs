@@ -12,8 +12,6 @@ namespace Assets.Version2
         [Header("Parameter")]
         [Header("Basics")]
         [SerializeField] private UnitState m_currentState = UnitState.Idle;
-        [SerializeField] private int m_group;//LayerMask
-        [SerializeField] private int m_targetLayer;
         [Header("Launch Projectile")]
         [SerializeField] private float m_projectileRadius = 0.5f;//get from projectile collider radius
         [SerializeField] private float m_launchSpeed;
@@ -74,7 +72,7 @@ namespace Assets.Version2
         private void LaunchProjectile()
         {
             Instantiate(m_arrow, m_launchPoint.position, Quaternion.identity, transform).GetComponent<Projectile>()
-                .Initialize(m_launchVector, m_attackHandler.CurrentPoint, m_targetLayer);
+                .Initialize(m_launchVector, m_attackHandler.CurrentPoint, m_detectionHandler.TargetLayer);
 
             m_attackHandler.EnterCoolDown();
         }
@@ -203,10 +201,8 @@ namespace Assets.Version2
             m_health.Initialize();
             m_attackHandler.Initialize();
             m_movement.Initialize();
-            m_detectionHandler.Initialize(m_group);
-            m_view.Initialize(m_group);
-
-            m_targetLayer = (int)Mathf.Log(m_detectionHandler.TargetLayerMask, 2f);
+            m_detectionHandler.Initialize();
+            m_view.Initialize();
         }
 
         private void OnDisable()

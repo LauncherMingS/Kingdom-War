@@ -10,7 +10,6 @@ namespace Assets.Version2
         [Header("Parameter")]
         [Header("Basics")]
         [SerializeField] private UnitState m_currentState = UnitState.Idle;
-        [SerializeField] private int m_group;//LayerMask
         [Header("Detection")]
         [SerializeField] private float m_attackDetectionRadius = 5f;
         [SerializeField] private float m_defenseDetectionRadius = 3f;
@@ -170,8 +169,8 @@ namespace Assets.Version2
             m_health.Initialize();
             m_attackHandler.Initialize();
             m_movement.Initialize();
-            m_detectionHandler.Initialize(m_group);
-            m_view.Initialize(m_group);
+            m_detectionHandler.Initialize();
+            m_view.Initialize();
         }
 
         private void OnDisable()
