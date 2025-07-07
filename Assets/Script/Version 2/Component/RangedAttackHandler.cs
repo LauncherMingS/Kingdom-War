@@ -21,15 +21,17 @@ namespace Assets.Version2
         [SerializeField] private Vector2 m_launchVelocity;
 
         [Header("Asset Reference")]
-        [SerializeField] private GameObject m_arrow;
+        [SerializeField] private UnitFactory m_factory;
 
         public float ProjectileRadius => m_projectileRadius;
 
 
         public override void OnExecuteAttack()
         {
-            Instantiate(m_arrow, m_launchPoint.position, Quaternion.identity, transform)
-                .GetComponent<Projectile>().Initialize(m_launchVelocity, m_currentPoint, m_targetLayer);
+            Projectile t_arrow = m_factory.CreateProjectile();
+            t_arrow.Initialize(m_launchVelocity, m_currentPoint, m_targetLayer);
+            t_arrow.transform.position = m_launchPoint.position;
+            t_arrow.transform.SetParent(transform);
 
             EnterColdDown();
         }

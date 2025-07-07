@@ -2,19 +2,31 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public class UnitFactory : MonoBehaviour
+    [CreateAssetMenu(order = 1, menuName = "Scriptable Object/FactorySO/UnitFactory", fileName = "UnitFactory")]
+    public class UnitFactory : ScriptableObject
     {
-        [SerializeField] private Controller m_controller;
+        [Header("Sword Man SYWS")]
+        [SerializeField] private SwordManFactorySO m_SYWS_SwordManFactory;
+        [Header("Sword Man NLI")]
+        [SerializeField] private SwordManFactorySO m_NLI_SwordManFactory;
+        [Header("Projectile")]
+        [SerializeField] private ProjectileFactorySO m_projectileFactory;
 
-        [SerializeField] private GameObject m_infantryPrefab;
 
-        public void Recruit()
+        public SwordMan CreateSwordMan(Group group)
         {
-            GameObject t_gameObject = Instantiate(m_infantryPrefab, transform.position, Quaternion.identity);
-            SwordMan t_unit = t_gameObject.GetComponent<SwordMan>();
-            t_unit.SetController = m_controller;
+            return group switch
+            {
+                Group.SYWS => m_SYWS_SwordManFactory.Create(),
+                Group.NLI => m_NLI_SwordManFactory.Create(),
+                Group.None => null,
+                _ => throw new System.NotImplementedException(),
+            };
+        }
 
-            m_controller.AddUnit(t_unit);
+        public Projectile CreateProjectile()
+        {
+            return m_projectileFactory.Create();
         }
     }
 }

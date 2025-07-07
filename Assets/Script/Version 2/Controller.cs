@@ -6,7 +6,9 @@ namespace Assets.Version2
 {
     public class Controller : MonoBehaviour
     {
+        [Header("Parameter")]
         [SerializeField] private Command m_currentCommand = Command.None;
+        [SerializeField] private Group m_group = Group.None;
         [Header("Line Up")]
         [SerializeField] private float m_beginX = -10f;
         [SerializeField] private float m_commonDifferenceX = -3f;
@@ -17,6 +19,9 @@ namespace Assets.Version2
         [SerializeField] private Vector3 m_retreatPosition;
         [Header("Unit List")]
         [SerializeField] private List<SwordMan> m_units;
+
+        [Header("Asset Reference")]
+        [SerializeField] private UnitFactory m_factory;
 
         public Command CurrentCommand => m_currentCommand;
 
@@ -85,17 +90,21 @@ namespace Assets.Version2
             }
         }
 
-        public void AddUnit(SwordMan unit)
+        public void CreateSwordMan()
         {
-            unit.EnemyBasePosition = m_enemyBasePosition;
-            unit.RetreatPosition = m_retreatPosition;
+            SwordMan t_swordMan = m_factory.CreateSwordMan(m_group);
+            t_swordMan.SetController = this;
+            t_swordMan.EnemyBasePosition = m_enemyBasePosition;
+            t_swordMan.RetreatPosition = m_retreatPosition;
 
-            m_units.Add(unit);
+            m_units.Add(t_swordMan);
             LineUp(m_units.Count - 1);
         }
 
         private void Start()
         {
+            m_group = (GameManager.Instance.IsSYWS(gameObject.layer)) ? Group.SYWS : Group.NLI;
+
             SwitchCommand(Command.Defend);
         }
 
