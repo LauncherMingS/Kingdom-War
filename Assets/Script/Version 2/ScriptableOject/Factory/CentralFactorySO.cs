@@ -3,8 +3,8 @@ using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
-    [CreateAssetMenu(order = 1, menuName = "Scriptable Object/FactorySO/UnitFactory", fileName = "UnitFactory")]
-    public class UnitFactory : ScriptableObject
+    [CreateAssetMenu(order = 1, menuName = "Scriptable Object/FactorySO/CentralFactorySO", fileName = "CentralFactorySO")]
+    public class CentralFactorySO : ScriptableObject
     {
         [Header("Sword Man SYWS")]
         [SerializeField] private SwordManFactorySO m_SYWS_SwordManFactory;

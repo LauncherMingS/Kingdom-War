@@ -22,7 +22,7 @@ namespace Assets.Version2
         [SerializeField] private List<SwordMan> m_units;
 
         [Header("Asset Reference")]
-        [SerializeField] private UnitFactory m_factory;
+        [SerializeField] private CentralFactorySO m_factory;
 
         public Command CurrentCommand => m_currentCommand;
 

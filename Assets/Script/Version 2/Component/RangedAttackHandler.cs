@@ -21,7 +21,7 @@ namespace Assets.Version2
         [SerializeField] private Vector2 m_launchVelocity;
 
         [Header("Asset Reference")]
-        [SerializeField] private UnitFactory m_factory;
+        [SerializeField] private CentralFactorySO m_factory;
 
         public float ProjectileRadius => m_projectileRadius;
 
