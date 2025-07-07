@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
+using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
@@ -158,9 +159,9 @@ namespace Assets.Version2
             t_attack.SetDuration((double)m_attackClip.length);
 
             m_mainMixer = AnimationMixerPlayable.Create(m_graph, 3);
-            m_graph.Connect(t_idle, 0, m_mainMixer, (int)SwordMan.UnitState.Idle);
-            m_graph.Connect(t_move, 0, m_mainMixer, (int)SwordMan.UnitState.Move);
-            m_graph.Connect(t_attack, 0, m_mainMixer, (int)SwordMan.UnitState.Attack);
+            m_graph.Connect(t_idle, 0, m_mainMixer, (int)UnitState.Idle);
+            m_graph.Connect(t_move, 0, m_mainMixer, (int)UnitState.Move);
+            m_graph.Connect(t_attack, 0, m_mainMixer, (int)UnitState.Attack);
 
             AnimationPlayableOutput t_mainOutput = AnimationPlayableOutput.Create(m_graph, "Infantry Output", t_animator);
             t_mainOutput.SetSourcePlayable(m_mainMixer);

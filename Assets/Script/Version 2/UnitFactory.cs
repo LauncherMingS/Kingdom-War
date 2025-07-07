@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {

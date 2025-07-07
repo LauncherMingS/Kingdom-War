@@ -43,7 +43,7 @@ namespace Assets.Version2
         private void OnTriggerEnter(Collider other)
         {
             if (other.gameObject.layer == m_targetLayer
-                && other.TryGetComponent<IDamageable>(out IDamageable damageable))
+                && other.TryGetComponent(out IDamageable damageable))
             {
                 damageable.TakeDamage(m_attackPoint);
 

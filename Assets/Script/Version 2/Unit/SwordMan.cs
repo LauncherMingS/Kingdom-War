@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
@@ -73,22 +74,22 @@ namespace Assets.Version2
             m_movement.Move(position, distance, deltaTime);
         }
 
-        private Vector3 GetDetectionCenterByCommand(Controller.Command command)
+        private Vector3 GetDetectionCenterByCommand(Command command)
         {
             return command switch
             {
-                Controller.Command.Attack => transform.position,
-                Controller.Command.Defend => m_defensePosition,
+                Command.Attack => transform.position,
+                Command.Defend => m_defensePosition,
                 _ => Vector3.zero
             };
         }
 
-        private float GetDetectionRadiusByCommand(Controller.Command command)
+        private float GetDetectionRadiusByCommand(Command command)
         {
             return command switch
             {
-                Controller.Command.Attack => m_attackDetectionRadius,
-                Controller.Command.Defend => m_defenseDetectionRadius,
+                Command.Attack => m_attackDetectionRadius,
+                Command.Defend => m_defenseDetectionRadius,
                 _ => 0f
             };
         }
@@ -109,7 +110,7 @@ namespace Assets.Version2
             }
             else
             {
-                t_targetPosition = (m_controller.CurrentCommand == Controller.Command.Attack)
+                t_targetPosition = (m_controller.CurrentCommand == Command.Attack)
                     ? m_enemyBasePosition : m_defensePosition;
                 t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
             }
@@ -154,11 +155,11 @@ namespace Assets.Version2
 
             switch (m_controller.CurrentCommand)
             {
-                case Controller.Command.Attack:
-                case Controller.Command.Defend:
+                case Command.Attack:
+                case Command.Defend:
                     HandleAttackCommand(t_deltaTime);
                     return;
-                case Controller.Command.Retreat:
+                case Command.Retreat:
                     HandleRetreatCommand(t_deltaTime);
                     return;
             }
@@ -176,13 +177,6 @@ namespace Assets.Version2
         private void OnDisable()
         {
             m_view.Uninitialize();
-        }
-
-        public enum UnitState
-        {
-            Idle = 0,
-            Move = 1,
-            Attack = 2
         }
     }
 }

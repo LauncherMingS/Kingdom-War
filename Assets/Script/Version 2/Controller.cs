@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
@@ -106,14 +107,6 @@ namespace Assets.Version2
             m_group = (GameManager.Instance.IsSYWS(gameObject.layer)) ? Group.SYWS : Group.NLI;
 
             SwitchCommand(Command.Defend);
-        }
-
-        public enum Command
-        {
-            None = 0,
-            Attack = 1,
-            Defend = 2,
-            Retreat = 3
         }
     }
 }

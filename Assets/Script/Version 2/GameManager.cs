@@ -30,11 +30,4 @@ namespace Assets.Version2
             m_NLI = LayerMask.NameToLayer("NLI");
         }
     }
-
-    public enum Group
-    {
-        None = 0,
-        SYWS = 1,
-        NLI = 2
-    }
 }
