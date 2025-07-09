@@ -31,7 +31,6 @@ namespace Assets.Version2
             Projectile t_arrow = m_factory.CreateProjectile();
             t_arrow.Initialize(m_launchVelocity, m_currentPoint, m_targetLayer);
             t_arrow.transform.position = m_launchPoint.position;
-            t_arrow.transform.SetParent(transform);
 
             EnterColdDown();
         }

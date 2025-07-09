@@ -94,7 +94,6 @@ namespace Assets.Version2
         public void CreateSwordMan()
         {
             SwordMan t_swordMan = m_factory.CreateSwordMan(m_group);
-            t_swordMan.SetController = this;
             t_swordMan.EnemyBasePosition = m_enemyBasePosition;
             t_swordMan.RetreatPosition = m_retreatPosition;
 

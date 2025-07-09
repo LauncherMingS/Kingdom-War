@@ -8,6 +8,10 @@ namespace Assets.Version2
         [SerializeField] private int m_SYWS;
         [SerializeField] private int m_NLI;
 
+        [Header("Group Controller")]
+        [SerializeField] private Controller m_SYWS_Controller;
+        [SerializeField] private Controller m_NLI_Controller;
+
         public int SYWS => m_SYWS;
         public int NLI => m_NLI;
 
@@ -20,6 +24,11 @@ namespace Assets.Version2
         public int GetOppositeGroupLayer(int ourGroupLayer)
         {
             return (ourGroupLayer == m_SYWS) ? m_NLI : m_SYWS;
+        }
+
+        public Controller GetController(int ourGroupLayer)
+        {
+            return (IsSYWS(ourGroupLayer)) ? m_SYWS_Controller : m_NLI_Controller;
         }
 
         protected override void Awake()

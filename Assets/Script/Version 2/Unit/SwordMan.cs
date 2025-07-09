@@ -26,11 +26,6 @@ namespace Assets.Version2
         [SerializeField] private Movement m_movement;
         [SerializeField] private View m_view;
 
-        public Controller SetController
-        {
-            set => m_controller = value;
-        }
-
         public Vector3 EnemyBasePosition
         {
             set => m_enemyBasePosition = value;
@@ -45,6 +40,7 @@ namespace Assets.Version2
         {
             set => m_retreatPosition = value;
         }
+
 
         //Switch unit's state and animation
         public void SwitchUnitState(UnitState newUnitState)
@@ -147,6 +143,17 @@ namespace Assets.Version2
             }
         }
 
+        private void Initialize()
+        {
+            m_controller = GameManager.Instance.GetController(gameObject.layer);
+
+            m_attackHandler.Initialize();
+            m_health.Initialize();
+            m_movement.Initialize();
+            m_detectionHandler.Initialize();
+            m_view.Initialize();
+        }
+
         private void Update()
         {
             float t_deltaTime = Time.deltaTime;
@@ -165,13 +172,9 @@ namespace Assets.Version2
             }
         }
 
-        private void Start()
+        private void OnEnable()
         {
-            m_attackHandler.Initialize();
-            m_health.Initialize();
-            m_movement.Initialize();
-            m_detectionHandler.Initialize();
-            m_view.Initialize();
+            Initialize();
         }
 
         private void OnDisable()
