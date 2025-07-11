@@ -1,16 +1,16 @@
-using Assets.Version2;
 using UnityEngine;
 
-namespace Assets.Version2
+namespace Assets.Version2.Factory
 {
-    [CreateAssetMenu(order = 3, menuName = "Scriptable Object/FactorySO/SwordManFactorySO", fileName = "SwordManFactorySO")]
-    public class SwordManFactorySO : FactoryBaseSO<SwordMan>
+    [CreateAssetMenu(order = 2, menuName = "Scriptable Object/FactorySO/SwordManFactorySO", fileName = "SwordManFactorySO")]
+    public class SwordManFactorySO : FactorySO<SwordMan>
     {
         [SerializeField] private SwordMan m_swordMan;
 
-        public override SwordMan Create()
+
+        public override SwordMan Prefab
         {
-            return Instantiate(m_swordMan);
+            get => m_swordMan;
         }
     }
 }

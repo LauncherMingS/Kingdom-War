@@ -1,16 +1,16 @@
-using Assets.Version2;
 using UnityEngine;
 
-namespace Assets.Version2
+namespace Assets.Version2.Factory
 {
-    [CreateAssetMenu(order = 7, menuName = "Scriptable Object/FactorySO/ProjectileFactorySO", fileName = "ProjectileFactorySO")]
-    public class ProjectileFactorySO : FactoryBaseSO<Projectile>
+    [CreateAssetMenu(order = 3, menuName = "Scriptable Object/FactorySO/ProjectileFactorySO", fileName = "ProjectileFactorySO")]
+    public class ProjectileFactorySO : FactorySO<Projectile>
     {
         [SerializeField] private Projectile m_projectile;
 
-        public override Projectile Create()
+
+        public override Projectile Prefab
         {
-            return Instantiate(m_projectile);
+            get => m_projectile;
         }
     }
 }

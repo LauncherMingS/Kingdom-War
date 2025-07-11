@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Assets.Version2.GameEnum
 {
     public enum UnitState

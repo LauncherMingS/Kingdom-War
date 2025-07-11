@@ -1,0 +1,10 @@
+﻿namespace Assets.Version2.GameEnum
+{
+    public enum UnitType
+    {
+        None = 0,
+        SwordMan = 1,
+        Archer = 2,
+        Projectile = 3
+    }
+}

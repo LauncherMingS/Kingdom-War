@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Version2.Factory;
 
 namespace Assets.Version2
 {
@@ -11,6 +12,8 @@ namespace Assets.Version2
         [Header("Group Controller")]
         [SerializeField] private Controller m_SYWS_Controller;
         [SerializeField] private Controller m_NLI_Controller;
+
+        [SerializeField] private FactorySOSetting m_factorySetting;
 
         public int SYWS => m_SYWS;
         public int NLI => m_NLI;
@@ -37,6 +40,11 @@ namespace Assets.Version2
 
             m_SYWS = LayerMask.NameToLayer("SYWS");
             m_NLI = LayerMask.NameToLayer("NLI");
+        }
+
+        private void Start()
+        {
+            ScriptableObject.CreateInstance<CentralFactorySO>().Register(m_factorySetting.Factories);
         }
     }
 }

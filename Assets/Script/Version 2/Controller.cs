@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Version2.GameEnum;
+using Assets.Version2.Factory;
 
 namespace Assets.Version2
 {
@@ -20,9 +21,6 @@ namespace Assets.Version2
         [SerializeField] private Vector3 m_retreatPosition;
         [Header("Unit List")]
         [SerializeField] private List<SwordMan> m_units;
-
-        [Header("Asset Reference")]
-        [SerializeField] private CentralFactorySO m_factory;
 
         public Command CurrentCommand => m_currentCommand;
 
@@ -93,7 +91,7 @@ namespace Assets.Version2
 
         public void CreateSwordMan()
         {
-            SwordMan t_swordMan = m_factory.CreateSwordMan(m_group);
+            SwordMan t_swordMan = CentralFactorySO.Instance.Create<SwordMan>(m_group, UnitType.SwordMan);
             t_swordMan.EnemyBasePosition = m_enemyBasePosition;
             t_swordMan.RetreatPosition = m_retreatPosition;
 

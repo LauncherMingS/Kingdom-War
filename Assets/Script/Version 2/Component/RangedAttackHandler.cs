@@ -1,5 +1,6 @@
-using System;
 using UnityEngine;
+using Assets.Version2.Factory;
+using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
@@ -20,15 +21,12 @@ namespace Assets.Version2
         [SerializeField] private float m_launchDegree = 25f;
         [SerializeField] private Vector2 m_launchVelocity;
 
-        [Header("Asset Reference")]
-        [SerializeField] private CentralFactorySO m_factory;
-
         public float ProjectileRadius => m_projectileRadius;
 
 
         public override void OnExecuteAttack()
         {
-            Projectile t_arrow = m_factory.CreateProjectile();
+            Projectile t_arrow = CentralFactorySO.Instance.Create<Projectile>(Group.None, UnitType.Projectile);
             t_arrow.Initialize(m_launchVelocity, m_currentPoint, m_targetLayer);
             t_arrow.transform.position = m_launchPoint.position;
 
