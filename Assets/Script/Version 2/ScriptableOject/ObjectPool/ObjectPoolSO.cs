@@ -17,7 +17,7 @@ namespace Assets.Version2.Pool
         {
             T element = Instantiate(Prefab);
 #if UNITY_EDITOR
-            element.name = Prefab.name + " " + m_counter++;
+            element.name = $"{Prefab.name} {m_counter++}";
             element.transform.SetParent(m_root);
 #endif
 
@@ -63,9 +63,7 @@ namespace Assets.Version2.Pool
         {
             if (m_hasBeenPrewarmed)
             {
-#if UNITY_EDITOR
-                Debug.LogWarning("Pool has already been prewarmed.");
-#endif
+                GameManager.LogWarningEditor($"{name}: Pool has already been prewarmed[{m_hasBeenPrewarmed}]");
 
                 return;
             }
@@ -83,9 +81,7 @@ namespace Assets.Version2.Pool
         {
             if (m_hasBeenInitialized)
             {
-#if UNITY_EDITOR
-                Debug.LogWarning("Pool has already been initialized.");
-#endif
+                GameManager.LogWarningEditor($"{name}: Pool has already been initialized[{m_hasBeenInitialized}]");
 
                 return;
             }

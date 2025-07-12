@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Assets.Version2.Pool;
 
@@ -18,6 +19,21 @@ namespace Assets.Version2
         public int SYWS => m_SYWS;
         public int NLI => m_NLI;
 
+
+        //在編輯器中，才會被call
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void LogWarningEditor(string message) => Debug.LogWarning(message);
+
+        public static bool EnumIsDefined<TEnum>(int enumValue, string sourceName) where TEnum : struct, Enum
+        {
+            bool t_result = Enum.IsDefined(typeof(TEnum), enumValue);
+            if (!t_result)
+            {
+                LogWarningEditor($"{sourceName}: {enumValue} is not defind in {typeof(TEnum).Name}");
+            }
+
+            return t_result;
+        }
 
         public bool IsSYWS(int ourGroupLayer)
         {

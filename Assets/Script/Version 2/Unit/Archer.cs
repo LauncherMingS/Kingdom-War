@@ -3,58 +3,12 @@ using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
-    public class Archer : MonoBehaviour
+    public class Archer : Unit
     {
-        [Header("Game Reference")]
-        [SerializeField] private Controller m_controller;
-
-        [Header("Parameter")]
-        [Header("Basics")]
-        [SerializeField] private UnitState m_currentState = UnitState.Idle;
-        [Header("Detection")]
-        [SerializeField] private float m_attackDetectionRadius;
-        [SerializeField] private float m_defenseDetectionRadius;
-        [Header("Position")]
-        [SerializeField] private Vector3 m_enemyBasePosition;
-        [SerializeField] private Vector3 m_defensePosition;
-        [SerializeField] private Vector3 m_retreatPosition;
-
-        [Header("Component Reference")]
-        [SerializeField] private RangedAttackHandler m_attackHandler;
-        [SerializeField] private DetectionHandler m_detectionHandler;
-        [SerializeField] private Health m_health;
-        [SerializeField] private Movement m_movement;
-        [SerializeField] private View m_view;
-
-        public Vector3 EnemyBasePosition
-        {
-            set => m_enemyBasePosition = value;
-        }
-
-        public Vector3 DefensePosition
-        {
-            set => m_defensePosition = value;
-        }
-
-        public Vector3 RetreatPosition
-        {
-            set => m_retreatPosition = value;
-        }
+        [SerializeField] protected RangedAttackHandler m_attackHandler;
 
 
-        //Switch unit's state and animation
-        public void SwitchUnitState(UnitState newUnitState)
-        {
-            if (m_currentState == newUnitState)
-            {
-                return;
-            }
-
-            m_view.SwitchAnimation((int)newUnitState, (int)m_currentState);
-            m_currentState = newUnitState;
-        }
-
-        private void TryAttackTarget()
+        protected void TryAttackTarget()
         {
             SwitchUnitState(UnitState.Attack);
             if (m_attackHandler.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
@@ -63,33 +17,7 @@ namespace Assets.Version2
             }
         }
 
-        private void MoveTo(Vector3 position, float distance, float deltaTime)
-        {
-            SwitchUnitState(UnitState.Move);
-            m_movement.Move(position, distance, deltaTime);
-        }
-
-        private Vector3 GetDetectionCenterByCommand(Command command)
-        {
-            return command switch
-            {
-                Command.Attack => transform.position,
-                Command.Defend => m_defensePosition,
-                _ => Vector3.zero
-            };
-        }
-
-        private float GetDetectionRadiusByCommand(Command command)
-        {
-            return command switch
-            {
-                Command.Attack => m_attackDetectionRadius,
-                Command.Defend => m_defenseDetectionRadius,
-                _ => 0f
-            };
-        }
-
-        private void HandleAttackCommand(float deltaTime)
+        protected override void HandleAttackCommand(float deltaTime)
         {
             Vector3 t_detectionCenter = GetDetectionCenterByCommand(m_controller.CurrentCommand);
             float t_detectionRadius = GetDetectionRadiusByCommand(m_controller.CurrentCommand);
@@ -134,34 +62,19 @@ namespace Assets.Version2
             }
         }
 
-        private void HandleRetreatCommand(float deltaTime)
+        protected override void NotifyWhenDying()
         {
-            float t_targetDistance = Vector3.Distance(transform.position, m_retreatPosition);
-
-            m_view.Face(m_retreatPosition.x);
-
-            if (t_targetDistance > 0f)
-            {
-                MoveTo(m_retreatPosition, t_targetDistance, deltaTime);
-            }
-            else
-            {
-                SwitchUnitState(UnitState.Idle);
-            }
+            m_controller.RemoveUnit(UnitType.Archer, this);
         }
 
-        private void Initialize()
+        public override void Initialize()
         {
-            m_controller = GameManager.Instance.GetController(gameObject.layer);
+            base.Initialize();
 
-            m_detectionHandler.Initialize();
             m_attackHandler.Initialize(m_detectionHandler.TargetLayer);
-            m_health.Initialize();
-            m_movement.Initialize();
-            m_view.Initialize();
         }
 
-        private void Update()
+        protected override void Update()
         {
             float t_deltaTime = Time.deltaTime;
             m_attackHandler.UpdateCD(t_deltaTime);
@@ -177,16 +90,6 @@ namespace Assets.Version2
                     HandleRetreatCommand(t_deltaTime);
                     return;
             }
-        }
-
-        private void OnEnable()
-        {
-            Initialize();
-        }
-
-        private void OnDisable()
-        {
-            m_view.Uninitialize();
         }
     }
 }

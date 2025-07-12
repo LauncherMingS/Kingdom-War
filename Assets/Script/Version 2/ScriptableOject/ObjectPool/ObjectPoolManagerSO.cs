@@ -16,9 +16,7 @@ namespace Assets.Version2.Pool
         {
             if (!m_pools.TryGetValue(key, out ObjectPoolBaseSO pool))
             {
-#if UNITY_EDITOR
-                Debug.LogAssertion($"Cannot find the corresponding pool.");
-#endif
+                GameManager.LogWarningEditor($"{name}: Cannot find the corresponding pool.");
 
                 return null;
             }
