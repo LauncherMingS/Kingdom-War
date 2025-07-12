@@ -1,5 +1,5 @@
 using UnityEngine;
-using Assets.Version2.Factory;
+using Assets.Version2.Pool;
 using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
@@ -26,7 +26,7 @@ namespace Assets.Version2
 
         public override void OnExecuteAttack()
         {
-            Projectile t_arrow = CentralFactorySO.Instance.Create<Projectile>(Group.None, UnitType.Projectile);
+            Projectile t_arrow = ObjectPoolManagerSO.Instance.Get<Projectile>(Group.None, UnitType.Projectile);
             t_arrow.Initialize(m_launchVelocity, m_currentPoint, m_targetLayer);
             t_arrow.transform.position = m_launchPoint.position;
 

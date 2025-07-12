@@ -9,6 +9,7 @@ namespace Assets.Version2
         [SerializeField] private float m_currentHP;
 
         public event Action<float> OnHurt;
+        public event Action OnDying;
 
         void IDamageable.TakeDamage(float point)
         {
@@ -16,7 +17,7 @@ namespace Assets.Version2
 
             if (m_currentHP <= 0f)
             {
-                Destroy(gameObject);
+                OnDying.Invoke();
                 return;
             }
 

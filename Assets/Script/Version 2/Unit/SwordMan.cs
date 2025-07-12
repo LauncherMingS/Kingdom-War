@@ -143,15 +143,28 @@ namespace Assets.Version2
             }
         }
 
-        private void Initialize()
+        public void NotifyWhenDying()
         {
-            m_controller = GameManager.Instance.GetController(gameObject.layer);
+            m_controller.RemoveSwordMan(this);
+        }
 
+        public void Initialize()
+        {
             m_attackHandler.Initialize();
             m_health.Initialize();
             m_movement.Initialize();
             m_detectionHandler.Initialize();
             m_view.Initialize();
+
+            m_controller = GameManager.Instance.GetController(gameObject.layer);
+            m_health.OnDying += NotifyWhenDying;
+        }
+
+        public void UnInitialize()
+        {
+            m_view.Uninitialize();
+
+            m_health.OnDying -= NotifyWhenDying;
         }
 
         private void Update()
@@ -170,16 +183,6 @@ namespace Assets.Version2
                     HandleRetreatCommand(t_deltaTime);
                     return;
             }
-        }
-
-        private void OnEnable()
-        {
-            Initialize();
-        }
-
-        private void OnDisable()
-        {
-            m_view.Uninitialize();
         }
     }
 }

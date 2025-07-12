@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Version2.GameEnum;
-using Assets.Version2.Factory;
+using Assets.Version2.Pool;
 
 namespace Assets.Version2
 {
@@ -91,12 +91,23 @@ namespace Assets.Version2
 
         public void CreateSwordMan()
         {
-            SwordMan t_swordMan = CentralFactorySO.Instance.Create<SwordMan>(m_group, UnitType.SwordMan);
+            SwordMan t_swordMan = ObjectPoolManagerSO.Instance.Get<SwordMan>(m_group, UnitType.SwordMan);
+            t_swordMan.Initialize();
             t_swordMan.EnemyBasePosition = m_enemyBasePosition;
             t_swordMan.RetreatPosition = m_retreatPosition;
+            t_swordMan.transform.position = transform.position;
 
             m_units.Add(t_swordMan);
             LineUp(m_units.Count - 1);
+        }
+
+        public void RemoveSwordMan(SwordMan unit)
+        {
+            unit.UnInitialize();
+            ObjectPoolManagerSO.Instance.Recycle(m_group, UnitType.SwordMan, unit);
+
+            m_units.Remove(unit);
+            LineUp();
         }
 
         private void Start()

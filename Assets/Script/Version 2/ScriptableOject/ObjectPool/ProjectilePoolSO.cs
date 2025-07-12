@@ -1,0 +1,15 @@
+using UnityEngine;
+
+namespace Assets.Version2.Pool
+{
+    [CreateAssetMenu(order = 3, menuName = "Scriptable Object/ObjectPoolSO/ProjectilePoolSO", fileName = "ProjectilePoolSO")]
+    public class ProjectilePoolSO : ObjectPoolSO<Projectile>
+    {
+        [SerializeField] private Projectile m_projectile;
+
+        public override Projectile Prefab
+        {
+            get => m_projectile;
+        }
+    }
+}

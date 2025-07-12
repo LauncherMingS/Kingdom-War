@@ -1,5 +1,5 @@
 using UnityEngine;
-using Assets.Version2.Factory;
+using Assets.Version2.Pool;
 
 namespace Assets.Version2
 {
@@ -8,12 +8,12 @@ namespace Assets.Version2
         [Header("Group Layer")]
         [SerializeField] private int m_SYWS;
         [SerializeField] private int m_NLI;
-
         [Header("Group Controller")]
         [SerializeField] private Controller m_SYWS_Controller;
         [SerializeField] private Controller m_NLI_Controller;
 
-        [SerializeField] private FactorySOSetting m_factorySetting;
+        [Header("Setting")]
+        [SerializeField] private ObjectPoolSettingSO m_poolSetting;
 
         public int SYWS => m_SYWS;
         public int NLI => m_NLI;
@@ -44,7 +44,7 @@ namespace Assets.Version2
 
         private void Start()
         {
-            ScriptableObject.CreateInstance<CentralFactorySO>().Register(m_factorySetting.Factories);
+            ScriptableObject.CreateInstance<ObjectPoolManagerSO>().RegisterPools(m_poolSetting.Pools);
         }
     }
 }

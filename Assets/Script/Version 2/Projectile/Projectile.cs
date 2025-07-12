@@ -1,4 +1,6 @@
 using UnityEngine;
+using Assets.Version2.GameEnum;
+using Assets.Version2.Pool;
 
 namespace Assets.Version2
 {
@@ -19,9 +21,13 @@ namespace Assets.Version2
             m_timer -= deltaTime;
             if (m_timer <= 0f)
             {
-                Destroy(gameObject);
-                return;
+                Recycle();
             }
+        }
+
+        private void Recycle()
+        {
+            ObjectPoolManagerSO.Instance.Recycle(Group.None, UnitType.Projectile, this);
         }
 
         private void Update()
@@ -47,8 +53,7 @@ namespace Assets.Version2
             {
                 damageable.TakeDamage(m_attackPoint);
 
-                Destroy(gameObject);
-                return;
+                Recycle();
             }
         }
     }
