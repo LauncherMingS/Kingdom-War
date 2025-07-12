@@ -18,7 +18,7 @@ namespace Assets.Version2
 
         public override void OnExecuteAttack()
         {
-            if (m_target != null && m_target.TryGetComponent(out IDamageable damageable))
+            if (m_target != null && m_target.TryGetComponent(out IDamageable damageable) && !damageable.IsDead)
             {
                 damageable.TakeDamage(m_currentPoint);
                 EnterColdDown();

@@ -100,3 +100,5 @@ Assets/Script.meta
 Assets/ScriptObject*
 Assets/Shader.meta
 Assets/TextMesh Pro*
+*.spriteatlasv2
+*.spriteatlasv2.meta

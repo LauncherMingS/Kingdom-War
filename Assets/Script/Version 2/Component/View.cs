@@ -62,6 +62,15 @@ namespace Assets.Version2
             m_currentFlipX = t_face;
         }
 
+        public void Coloring(Color color)
+        {
+            int t_length = m_spriteRenderer.Length;
+            for (int i = 0; i < t_length; i++)
+            {
+                m_spriteRenderer[i].color = color;
+            }
+        }
+
         public void HurtVisualEffect(float point)
         {
             if (m_hurtFlashStatus)
@@ -77,16 +86,9 @@ namespace Assets.Version2
         {
             m_hurtFlashStatus = true;
 
-            int t_length = m_spriteRenderer.Length;
-            for (int i = 0; i < t_length; i++)
-            {
-                m_spriteRenderer[i].color = Color.red;
-            }
+            Coloring(Color.red);
             yield return new WaitForSeconds(m_hurtFlashDuration);
-            for (int i = 0; i < t_length; i++)
-            {
-                m_spriteRenderer[i].color = Color.white;
-            }
+            Coloring(Color.white);
 
             m_hurtFlashStatus = false;
         }
@@ -187,13 +189,30 @@ namespace Assets.Version2
             m_hurtFlashStatus = false;
             m_defaultFlipX = GameManager.Instance.IsSYWS(gameObject.layer);
             GetComponent<Health>().OnHurt += HurtVisualEffect;
-            ConstructPlayable();
+            Coloring(Color.white);
+
+            if (!m_graph.IsValid())
+            {
+                ConstructPlayable();
+            }
+            else
+            {
+                m_graph.Play();
+            }
         }
 
         public void Uninitialize()
         {
-            m_graph.Destroy();
+            m_graph.Stop();
             GetComponent<Health>().OnHurt -= HurtVisualEffect;
+        }
+
+        private void OnDestroy()
+        {
+            if (m_graph.IsValid())
+            {
+                m_graph.Destroy();
+            }
         }
     }
 }
