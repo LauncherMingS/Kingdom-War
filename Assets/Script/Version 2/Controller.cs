@@ -16,8 +16,9 @@ namespace Assets.Version2
         [SerializeField] private float m_commonDifferenceX = -3f;
         [SerializeField] private float m_totalLengthZ = 12f;
         [SerializeField] private int m_maxUnitPerRow = 4;
-        [SerializeField] private int m_swordManLastRow = 0;
-        [SerializeField] private int m_archerLastRow = 0;
+        private const int UnitNum = 2;//SwordMan, Archer
+        private const int EnumValueShift = 1;
+        [SerializeField] private int[] m_unitsLastRow;
         [Header("Position")]
         [SerializeField] private Vector3 m_enemyBasePosition;
         [SerializeField] private Vector3 m_retreatPosition;
@@ -66,10 +67,10 @@ namespace Assets.Version2
             switch ((UnitType)typeValue)
             {
                 case UnitType.SwordMan:
-                    RecruitUnit(m_swordManList, UnitType.SwordMan, ref m_swordManLastRow, LineUpAfterSwordManRowChange);
+                    RecruitUnit(m_swordManList, UnitType.SwordMan, 0, LineUpAfterSwordManRowChange);
                     break;
                 case UnitType.Archer:
-                    RecruitUnit(m_archerList, UnitType.Archer, ref m_archerLastRow, null);
+                    RecruitUnit(m_archerList, UnitType.Archer, 1);
                     break;
                 default:
                     GameManager.LogWarningEditor($"{name}: Cannot Recruit this unit type[{(UnitType)typeValue}]");
@@ -77,7 +78,8 @@ namespace Assets.Version2
             }
         }
 
-        private void RecruitUnit<T>(List<T> unitList, UnitType unitType, ref int lastRow, Action lineUpOther) where T : Unit
+        private void RecruitUnit<T>(List<T> unitList, UnitType unitType, int lastRowIndex
+            , Action lineUpOther = null) where T : Unit
         {
             T t_unit = ObjectPoolManagerSO.Instance.Get<T>(m_group, unitType);
             t_unit.EnemyBasePosition = m_enemyBasePosition;
@@ -87,14 +89,14 @@ namespace Assets.Version2
 
             unitList.Add(t_unit);
 
-            int t_newLastRowIndex = CalculateLastRowIndex(unitList);
-            if (t_newLastRowIndex > lastRow)
+            int t_newLastRow = CalculateLastRowIndex(unitList);
+            if (t_newLastRow > m_unitsLastRow[lastRowIndex])
             {
-                lastRow = t_newLastRowIndex;
+                m_unitsLastRow[lastRowIndex] = t_newLastRow;
                 lineUpOther?.Invoke();
             }
+            m_unitsLastRow[lastRowIndex] = t_newLastRow;
             LineUp(unitList, unitType, unitList.Count - 1);
-            lastRow = t_newLastRowIndex;
         }
 
         public void RemoveUnit<T>(UnitType unitType, T unit)
@@ -102,10 +104,10 @@ namespace Assets.Version2
             switch (unitType)
             {
                 case UnitType.SwordMan:
-                    RemoveUnit(m_swordManList, unitType, unit as SwordMan, ref m_swordManLastRow, LineUpAfterSwordManRowChange);
+                    RemoveUnit(m_swordManList, unitType, unit as SwordMan, 0, LineUpAfterSwordManRowChange);
                     break;
                 case UnitType.Archer:
-                    RemoveUnit(m_archerList, unitType, unit as Archer, ref m_archerLastRow, null);
+                    RemoveUnit(m_archerList, unitType, unit as Archer, 1);
                     break;
                 default:
                     GameManager.LogWarningEditor($"{name}: Cannot Remove this unit type[{unitType}]");
@@ -113,27 +115,43 @@ namespace Assets.Version2
             }
         }
 
-        public void RemoveUnit<T>(List<T> unitList, UnitType unitType, T unit, ref int lastRow, Action lineUpOther) where T : Unit
+        public void RemoveUnit<T>(List<T> unitList, UnitType unitType, T unit, int lastRowIndex
+            , Action lineUpOther = null) where T : Unit
         {
             unit.UnInitialize();
 
             unitList.Remove(unit);
             ObjectPoolManagerSO.Instance.Recycle(m_group, unitType, unit);
 
-            int t_newLastRowIndex = CalculateLastRowIndex(unitList);
-            if (t_newLastRowIndex < lastRow)
+            int t_newLastRow = CalculateLastRowIndex(unitList);
+            if (t_newLastRow < m_unitsLastRow[lastRowIndex])
             {
-                lastRow = t_newLastRowIndex;
+                m_unitsLastRow[lastRowIndex] = t_newLastRow;
                 lineUpOther?.Invoke();
             }
+            m_unitsLastRow[lastRowIndex] = t_newLastRow;
             LineUp(unitList, unitType, unitList.Count - 1);
-            lastRow = t_newLastRowIndex;
         }
 
         private int CalculateLastRowIndex<T>(List<T> unitList)
         {
+            if (unitList.Count == 0)
+            {
+                return -1;
+            }
+
             int t_lastRowIndex = unitList.Count / m_maxUnitPerRow;
             return (unitList.Count % m_maxUnitPerRow == 0) ? --t_lastRowIndex : t_lastRowIndex;
+        }
+
+        private int GetListCount(int index)
+        {
+            return index switch
+            {
+                0 => m_swordManList.Count,
+                1 => m_archerList.Count,
+                _ => -1
+            };
         }
 
         private void LineUp<T>(List<T> unitList, UnitType unitType, int startIndex = 0) where T : Unit
@@ -148,18 +166,14 @@ namespace Assets.Version2
                 return;
             }
 
+            int t_typeValue = (int)unitType - EnumValueShift;
             int t_preOtherUnitRow = 0;
-            switch (unitType)
+            for (int i = 0; i < t_typeValue; i++)
             {
-                case UnitType.SwordMan:
-                    if (unitType != UnitType.SwordMan)
-                    {
-                        goto case UnitType.Archer;
-                    }
-                    break;
-                case UnitType.Archer:
-                    t_preOtherUnitRow += m_swordManLastRow + 1;
-                    break;
+                if (GetListCount(i) > 0)
+                {
+                    t_preOtherUnitRow += m_unitsLastRow[i] + 1;
+                }
             }
 
             int t_currentRow = startIndex / m_maxUnitPerRow;
@@ -196,6 +210,7 @@ namespace Assets.Version2
         private void Start()
         {
             m_group = (GameManager.Instance.IsSYWS(gameObject.layer)) ? Group.SYWS : Group.NLI;
+            m_unitsLastRow = new int[UnitNum] { -1, -1 };
 
             SwitchCommand(Command.Defend);
         }

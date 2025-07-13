@@ -38,8 +38,9 @@ namespace Assets.Version2
             base.Initialize();
 
             m_targetLayer = targetLayer;
+            float t_directionX = GameManager.Instance.IsSYWS(m_targetLayer) ? -1 : 1;
             float t_radian = m_launchDegree * Mathf.Deg2Rad;
-            float t_velocityX = m_launchSpeed * Mathf.Cos(t_radian);
+            float t_velocityX = m_launchSpeed * Mathf.Cos(t_radian) * t_directionX;
             float t_velocityY = m_launchSpeed * Mathf.Sin(t_radian);
             m_launchVelocity = new Vector2(t_velocityX, t_velocityY);
         }
