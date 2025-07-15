@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.Version2.Pool
 {
-    [CreateAssetMenu(order = 4, menuName = "Scriptable Object/ObjectPoolSO/ProjectilePoolSO", fileName = "ProjectilePoolSO")]
+    [CreateAssetMenu(order = 5, menuName = "Scriptable Object/ObjectPoolSO/ProjectilePoolSO", fileName = "ProjectilePoolSO")]
     public class ProjectilePoolSO : ObjectPoolSO<Projectile>
     {
         [SerializeField] private Projectile m_projectile;

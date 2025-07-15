@@ -11,6 +11,8 @@ namespace Assets.Version2
 
         [Header("Parameter")]
         [SerializeField] protected UnitState m_currentState;
+        [SerializeField] protected float m_notifyCD;
+        [SerializeField] protected float m_currentNotifyCD;
         [Header("Detection")]
         [SerializeField] protected float m_attackDetectionRadius;
         [SerializeField] protected float m_defenseDetectionRadius;
@@ -57,12 +59,24 @@ namespace Assets.Version2
             m_currentState = newUnitState;
         }
 
+        //Default Attack Target
+        protected virtual void TryAttackOrHealTarget(Transform target = null)
+        {
+            SwitchUnitState(UnitState.Attack);
+            if (Interact.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
+            {
+                Interact.Target = target;
+                m_view.ResetAnimation((int)m_currentState);
+            }
+        }
+
         protected void MoveTo(Vector3 position, float distance, float deltaTime)
         {
             SwitchUnitState(UnitState.Move);
             m_movement.Move(position, distance, deltaTime);
         }
 
+        //Use for DetectionHandler
         protected Vector3 GetDetectionCenterByCommand(Command command)
         {
             return command switch
@@ -73,6 +87,7 @@ namespace Assets.Version2
             };
         }
 
+        //Use for DetectionHandler
         protected float GetDetectionRadiusByCommand(Command command)
         {
             return command switch
@@ -91,27 +106,48 @@ namespace Assets.Version2
 
             m_view.Face(m_retreatPosition.x);
 
-            if (t_targetDistance > 0f)
+            if (t_targetDistance > 0f)//Move to retreat position
             {
                 MoveTo(m_retreatPosition, t_targetDistance, deltaTime);
             }
-            else
+            else//Idle, do nothing
             {
                 SwitchUnitState(UnitState.Idle);
             }
         }
 
-        protected abstract void NotifyWhenDying();
+        protected void UpdateCD(float deltaTime)
+        {
+            m_currentNotifyCD = Mathf.Max(m_currentNotifyCD - deltaTime, 0f);
+        }
+
+        //When getting hurt, call Controller to find available priest to heal the hurted unit.
+        protected void NotifyGettingHurt(float attackPoint)
+        {
+            if (m_health.IsAcceptHealed || m_currentNotifyCD != 0f || m_health.IsFullHP)
+            {
+                return;
+            }
+
+            m_controller.FirstAid(transform);
+            m_currentNotifyCD = m_notifyCD;
+        }
+
+        protected abstract void NotifyWhenDying(float attackPoint);
 
         public virtual void Initialize()
         {
             m_controller = GameManager.Instance.GetController(gameObject.layer);
+            m_currentNotifyCD = 0f;
+            
             Interact.Initialize();
-            m_detectionHandler.Initialize();
+            m_detectionHandler?.Initialize();
             m_health.Initialize();
             m_movement.Initialize();
             m_view.Initialize();
 
+            OnUpdateCD += UpdateCD;
+            m_health.OnHurt += NotifyGettingHurt;
             m_health.OnDying += NotifyWhenDying;
         }
 
@@ -120,6 +156,8 @@ namespace Assets.Version2
             Interact.UnInitialize();
             m_view.Uninitialize();
 
+            OnUpdateCD -= UpdateCD;
+            m_health.OnHurt -= NotifyGettingHurt;
             m_health.OnDying -= NotifyWhenDying;
         }
 

@@ -9,23 +9,16 @@ namespace Assets.Version2
 
         public override InteractHandler Interact => m_attackHandler;
 
-        protected void TryAttackTarget(Transform target)
-        {
-            SwitchUnitState(UnitState.Attack);
-            if (m_attackHandler.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
-            {
-                m_attackHandler.SetTarget(target);
-                m_view.ResetAnimation((int)m_currentState);
-            }
-        }
 
         protected override void HandleAttackCommand(float deltaTime)
         {
+            //Find target through DetectionHandler
             Vector3 t_detectionCenter = GetDetectionCenterByCommand(m_controller.CurrentCommand);
             float t_detectionRadius = GetDetectionRadiusByCommand(m_controller.CurrentCommand);
             Transform t_target = m_detectionHandler.DetectClosestTarget(t_detectionCenter, t_detectionRadius
                 , out float t_targetSquaredDistance);
 
+            //Set target or enemy base position/defense position related data
             Vector3 t_targetPosition;
             float t_targetDistance;
             if (t_target != null)
@@ -42,21 +35,21 @@ namespace Assets.Version2
 
             m_view.Face(t_targetPosition.x);
 
-            if (t_target != null && m_attackHandler.Range >= t_targetDistance)
+            if (t_target != null && m_attackHandler.Range >= t_targetDistance)//Attack
             {
-                TryAttackTarget(t_target);
+                TryAttackOrHealTarget(t_target);
             }
-            else if (t_targetDistance > 0f)
+            else if (t_targetDistance > 0f)//Move to enemy base position or defense position
             {
                 MoveTo(t_targetPosition, t_targetDistance, deltaTime);
             }
-            else
+            else//Idle, do nothing
             {
                 SwitchUnitState(UnitState.Idle);
             }
         }
 
-        protected override void NotifyWhenDying()
+        protected override void NotifyWhenDying(float attackPoint)
         {
             m_controller.RemoveUnit(UnitType.SwordMan, this);
         }

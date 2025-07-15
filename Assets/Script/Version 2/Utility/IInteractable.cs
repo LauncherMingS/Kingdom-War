@@ -1,3 +1,5 @@
+using System;
+
 namespace Assets.Version2
 {
     public interface IDamageable
@@ -7,6 +9,11 @@ namespace Assets.Version2
     }
     public interface IHealable
     {
-        public void Heal(float point);
+        public event Action<float> OnHealed;
+        public event Action<float> OnDying;
+        public bool IsDead { get; }
+        public bool IsFullHP { get; }
+        public bool IsAcceptHealed { get; set; }
+        public void BeingHealed(float point);
     }
 }

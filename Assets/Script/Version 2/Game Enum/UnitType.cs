@@ -5,6 +5,7 @@
         None = 0,
         SwordMan = 1,
         Archer = 2,
-        Projectile = 3
+        Priest = 3,
+        Projectile = 4
     }
 }
