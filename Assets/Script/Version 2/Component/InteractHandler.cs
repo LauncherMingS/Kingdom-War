@@ -2,21 +2,36 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public abstract class AttackHandlerBase : MonoBehaviour
+    public abstract class InteractHandler : MonoBehaviour
     {
+        [Header("Game Reference")]
+        [SerializeField] protected Transform m_target;
+
         [Header("Parameter")]
-        [Header("Attack Point")]
+        [Header("Attack/Heal Point")]
         [SerializeField] protected float m_basePoint = 3f;
         [SerializeField] protected float m_currentPoint;
-        [Header("Attack Cool Down")]
+        [Header("Attack/Heal Cool Down")]
         [SerializeField] protected float m_baseCD = 2.5f;
         [SerializeField] protected float m_currentCD;
-        [Header("Attack Range")]
+        [Header("Attack/Heal Range")]
         [SerializeField] protected float m_range = 2f;
 
         public float CurrentCD => m_currentCD;
+
         public float Range => m_range;
 
+        public virtual Transform Target
+        {
+            get => m_target;
+            set => m_target = value;
+        }
+
+
+        protected virtual void ClearTarget()
+        {
+            m_target = null;
+        }
 
         public void EnterColdDown()
         {
@@ -32,9 +47,13 @@ namespace Assets.Version2
         {
             m_currentPoint = m_basePoint;
             m_currentCD = 0f;
+
+            GetComponent<Unit>().OnUpdateCD += UpdateCD;
         }
 
-        //Trigger by Animation event
-        public abstract void OnExecuteAttack();
+        public virtual void UnInitialize()
+        {
+            GetComponent<Unit>().OnUpdateCD -= UpdateCD;
+        }
     }
 }

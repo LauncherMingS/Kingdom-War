@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Assets.Version2.GameEnum;
 
@@ -24,6 +25,8 @@ namespace Assets.Version2
         [SerializeField] protected Movement m_movement;
         [SerializeField] protected View m_view;
 
+        public event Action<float> OnUpdateCD;
+
         public Vector3 EnemyBasePosition
         {
             set => m_enemyBasePosition = value;
@@ -38,6 +41,8 @@ namespace Assets.Version2
         {
             set => m_retreatPosition = value;
         }
+
+        public virtual InteractHandler Interact { get; }
 
 
         //Switch unit's state and animation
@@ -100,22 +105,40 @@ namespace Assets.Version2
 
         public virtual void Initialize()
         {
+            m_controller = GameManager.Instance.GetController(gameObject.layer);
+            Interact.Initialize();
             m_detectionHandler.Initialize();
             m_health.Initialize();
             m_movement.Initialize();
             m_view.Initialize();
 
-            m_controller = GameManager.Instance.GetController(gameObject.layer);
             m_health.OnDying += NotifyWhenDying;
         }
 
         public virtual void UnInitialize()
         {
+            Interact.UnInitialize();
             m_view.Uninitialize();
 
             m_health.OnDying -= NotifyWhenDying;
         }
 
-        protected abstract void Update();
+        protected virtual void Update()
+        {
+            float t_deltaTime = Time.deltaTime;
+            OnUpdateCD.Invoke(t_deltaTime);
+
+
+            switch (m_controller.CurrentCommand)
+            {
+                case Command.Attack:
+                case Command.Defend:
+                    HandleAttackCommand(t_deltaTime);
+                    return;
+                case Command.Retreat:
+                    HandleRetreatCommand(t_deltaTime);
+                    return;
+            }
+        }
     }
 }

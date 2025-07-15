@@ -2,29 +2,37 @@ using UnityEngine;
 
 namespace Assets.Version2
 {
-    public class MeleeAttackHandler : AttackHandlerBase
+    public class MeleeAttackHandler : InteractHandler, IAttacking
     {
-        [Space(32f)]
-        [Header("MeleeAttackHandler")]
+        [SerializeField] protected IDamageable m_damageable;
 
-        [Header("Game Reference")]
-        [SerializeField] private Transform m_target;
-
-        
-        public void SetTarget(Transform target)
+        public override Transform Target
         {
-            m_target = target;
+            get => m_target;
+            set
+            {
+                m_target = value;
+                m_target.TryGetComponent(out m_damageable);
+            }
         }
 
-        public override void OnExecuteAttack()
+
+        protected override void ClearTarget()
         {
-            if (m_target != null && m_target.TryGetComponent(out IDamageable damageable) && !damageable.IsDead)
+            base.ClearTarget();
+
+            m_damageable = null;
+        }
+
+        public void OnExecuteAttack()
+        {
+            if (m_damageable != null && !m_damageable.IsDead)
             {
-                damageable.TakeDamage(m_currentPoint);
+                m_damageable.TakeDamage(m_currentPoint);
                 EnterColdDown();
             }
 
-            m_target = null;
+            ClearTarget();
         }
     }
 }

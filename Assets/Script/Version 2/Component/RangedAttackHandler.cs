@@ -4,7 +4,7 @@ using Assets.Version2.GameEnum;
 
 namespace Assets.Version2
 {
-    public class RangedAttackHandler : AttackHandlerBase
+    public class RangedAttackHandler : InteractHandler, IAttacking
     {
         [Space(32f)]
         [Header("RangedAttackHandler")]
@@ -24,7 +24,7 @@ namespace Assets.Version2
         public float ProjectileRadius => m_projectileRadius;
 
 
-        public override void OnExecuteAttack()
+        public void OnExecuteAttack()
         {
             Projectile t_arrow = ObjectPoolManagerSO.Instance.Get<Projectile>(Group.None, UnitType.Projectile);
             t_arrow.Initialize(m_launchVelocity, m_currentPoint, m_targetLayer);
@@ -33,11 +33,11 @@ namespace Assets.Version2
             EnterColdDown();
         }
 
-        public void Initialize(int targetLayer)
+        public override void Initialize()
         {
             base.Initialize();
 
-            m_targetLayer = targetLayer;
+            m_targetLayer = GameManager.Instance.GetOppositeGroupLayer(gameObject.layer);
             float t_directionX = GameManager.Instance.IsSYWS(m_targetLayer) ? -1 : 1;
             float t_radian = m_launchDegree * Mathf.Deg2Rad;
             float t_velocityX = m_launchSpeed * Mathf.Cos(t_radian) * t_directionX;

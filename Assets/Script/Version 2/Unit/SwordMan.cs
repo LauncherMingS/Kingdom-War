@@ -7,6 +7,7 @@ namespace Assets.Version2
     {
         [SerializeField] protected MeleeAttackHandler m_attackHandler;
 
+        public override InteractHandler Interact => m_attackHandler;
 
         protected void TryAttackTarget(Transform target)
         {
@@ -58,31 +59,6 @@ namespace Assets.Version2
         protected override void NotifyWhenDying()
         {
             m_controller.RemoveUnit(UnitType.SwordMan, this);
-        }
-
-        public override void Initialize()
-        {
-            base.Initialize();
-
-            m_attackHandler.Initialize();
-        }
-
-        protected override void Update()
-        {
-            float t_deltaTime = Time.deltaTime;
-            m_attackHandler.UpdateCD(t_deltaTime);
-
-
-            switch (m_controller.CurrentCommand)
-            {
-                case Command.Attack:
-                case Command.Defend:
-                    HandleAttackCommand(t_deltaTime);
-                    return;
-                case Command.Retreat:
-                    HandleRetreatCommand(t_deltaTime);
-                    return;
-            }
         }
     }
 }
