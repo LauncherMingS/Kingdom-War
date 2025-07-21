@@ -1,5 +1,6 @@
-using Assets.Version2.GameEnum;
 using UnityEngine;
+using Assets.Version2.GameEnum;
+using Assets.Version2.StatusEffectSystem;
 
 namespace Assets.Version2
 {
@@ -17,18 +18,29 @@ namespace Assets.Version2
         //So this unit does not use DetectionHandler to find targets.
         public bool SetHealTarget(Transform transform)
         {
+            //Exclude self(because of setting that priest cannot heal herself)
             if (transform.GetHashCode() == this.transform.GetHashCode())
             {
                 return false;
             }
 
-            m_healHandler.Target = transform;
+            if (!transform.TryGetComponent(out Unit target))
+            {
+                return false;
+            }
+
+            m_healHandler.Target = target;
+            if (m_healHandler.Healable == null)
+            {
+                return false;
+            }
+
             return true;
         }
 
         protected override void HandleAttackCommand(float deltaTime)
         {
-            Transform t_target = m_healHandler.Target;
+            Transform t_target = (m_healHandler.Target != null) ? m_healHandler.Target.transform : null;
 
             Vector3 t_targetPosition = (t_target != null) ? t_target.transform.position : m_defensePosition;
             float t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
@@ -44,6 +56,7 @@ namespace Assets.Version2
                         m_view.Face(t_targetPosition.x);
                         SwitchUnitState(UnitState.Attack);
                         m_view.ResetAnimation((int)UnitState.Attack);
+                        m_healHandler.ReleaseSkill(this);
                         return;
                     }
 

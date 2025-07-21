@@ -5,7 +5,7 @@ namespace Assets.Version2
     public abstract class InteractHandler : MonoBehaviour
     {
         [Header("Game Reference")]
-        [SerializeField] protected Transform m_target;
+        [SerializeField] protected Unit m_target;
 
         [Header("Parameter")]
         [Header("Attack/Heal Point")]
@@ -17,11 +17,13 @@ namespace Assets.Version2
         [Header("Attack/Heal Range")]
         [SerializeField] protected float m_range = 2f;
 
+        public float CurrentPoint => m_currentPoint;
+
         public float CurrentCD => m_currentCD;
 
         public float Range => m_range;
 
-        public virtual Transform Target
+        public virtual Unit Target
         {
             get => m_target;
             set => m_target = value;

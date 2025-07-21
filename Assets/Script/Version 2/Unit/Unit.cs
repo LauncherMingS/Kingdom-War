@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Assets.Version2.GameEnum;
+using Assets.Version2.StatusEffectSystem;
 
 namespace Assets.Version2
 {
@@ -26,6 +27,7 @@ namespace Assets.Version2
         [SerializeField] protected Health m_health;
         [SerializeField] protected Movement m_movement;
         [SerializeField] protected View m_view;
+        [SerializeField] protected StatusEffectManager m_statusManager = new();
 
         public event Action<float> OnUpdateCD;
 
@@ -46,6 +48,12 @@ namespace Assets.Version2
 
         public virtual InteractHandler Interact { get; }
 
+        public IDamageable Damageable => m_health;
+
+        public IHealable Healable => m_health;
+
+        public StatusEffectManager StatusManager => m_statusManager;
+
 
         //Switch unit's state and animation
         protected void SwitchUnitState(UnitState newUnitState)
@@ -60,12 +68,13 @@ namespace Assets.Version2
         }
 
         //Default Attack Target
-        protected virtual void TryAttackOrHealTarget(Transform target = null)
+        protected virtual void TryAttackOrHealTarget(Transform target)
         {
             SwitchUnitState(UnitState.Attack);
-            if (Interact.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState))
+            if (Interact.CurrentCD == 0f && m_view.AnimationIsDone((int)m_currentState)
+                && target.TryGetComponent(out Unit targetUnit))
             {
-                Interact.Target = target;
+                Interact.Target = targetUnit;
                 m_view.ResetAnimation((int)m_currentState);
             }
         }
@@ -145,6 +154,7 @@ namespace Assets.Version2
             m_health.Initialize();
             m_movement.Initialize();
             m_view.Initialize();
+            m_statusManager.Initialize(this);
 
             OnUpdateCD += UpdateCD;
             m_health.OnHurt += NotifyGettingHurt;
@@ -155,6 +165,7 @@ namespace Assets.Version2
         {
             Interact.UnInitialize();
             m_view.Uninitialize();
+            m_statusManager.UnInitialize(this);
 
             OnUpdateCD -= UpdateCD;
             m_health.OnHurt -= NotifyGettingHurt;

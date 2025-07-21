@@ -41,7 +41,7 @@ namespace Assets.Version2
                 float t_targetDistanceZ = Mathf.Abs(t_targetPosition.z - transform.position.z);
                 if (m_attackHandler.ProjectileRadius >= t_targetDistanceZ)
                 {
-                    TryAttackOrHealTarget();
+                    TryAttackOrHealTarget(t_target);
                     return;
                 }
 

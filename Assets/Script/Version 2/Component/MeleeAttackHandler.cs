@@ -6,15 +6,23 @@ namespace Assets.Version2
     {
         [SerializeField] protected IDamageable m_damageable;
 
-        public override Transform Target
+        public override Unit Target
         {
             get => m_target;
             set
             {
                 m_target = value;
-                m_target.TryGetComponent(out m_damageable);
+                if (m_target == null || m_target.Damageable == null)
+                {
+                    ClearTarget();
+                    return;
+                }
+
+                m_damageable = m_target.Damageable;
             }
         }
+
+        public IDamageable Damageable => m_damageable;
 
 
         protected override void ClearTarget()

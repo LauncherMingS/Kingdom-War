@@ -10,6 +10,7 @@ namespace Assets.Version2
         [Header("RangedAttackHandler")]
 
         [Header("Game Reference")]
+        [SerializeField] protected IDamageable m_damageable;
         [SerializeField] private Transform m_launchPoint;
 
         [Header("Parameter")]
@@ -20,6 +21,24 @@ namespace Assets.Version2
         [SerializeField] private float m_launchSpeed = 20f;
         [SerializeField] private float m_launchDegree = 25f;
         [SerializeField] private Vector2 m_launchVelocity;
+
+        public override Unit Target
+        {
+            get => m_target;
+            set
+            {
+                m_target = value;
+                if (m_target == null || m_target.Damageable == null)
+                {
+                    ClearTarget();
+                    return;
+                }
+
+                m_damageable = m_target.Damageable;
+            }
+        }
+
+        public IDamageable Damageable => m_damageable;
 
         public float ProjectileRadius => m_projectileRadius;
 
