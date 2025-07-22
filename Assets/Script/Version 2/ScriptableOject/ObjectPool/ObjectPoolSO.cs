@@ -13,7 +13,7 @@ namespace Assets.Version2.Pool
         public virtual T Prefab { get; }
 
 
-        protected T Create()
+        protected virtual T Create()
         {
             T element = Instantiate(Prefab);
 #if UNITY_EDITOR

@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Assets.Version2.Pool
 {
     [CreateAssetMenu(order = 4, menuName = "Scriptable Object/ObjectPoolSO/PriestPoolSO", fileName = "PriestPoolSO")]
-    public class PriestPoolSO : ObjectPoolSO<Priest>
+    public class PriestPoolSO : CharacterPoolSO<Priest>
     {
         [SerializeField] private Priest m_priest;
 
