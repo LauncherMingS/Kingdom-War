@@ -13,7 +13,7 @@ namespace Assets.Version2.Pool
         public virtual T Prefab { get; }
 
 
-        protected T Create()
+        protected virtual T Create()
         {
             T element = Instantiate(Prefab);
 #if UNITY_EDITOR
@@ -45,6 +45,9 @@ namespace Assets.Version2.Pool
 
         public void Recycle(T element)
         {
+#if UNITY_EDITOR
+            element.transform.SetParent(m_root);
+#endif
             element.gameObject.SetActive(false);
             m_pool.Enqueue(element);
         }
