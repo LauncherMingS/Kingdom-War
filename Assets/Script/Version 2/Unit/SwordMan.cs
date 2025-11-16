@@ -35,15 +35,15 @@ namespace Assets.Version2
 
             m_view.Face(t_targetPosition.x);
 
-            if (t_target != null && m_attackHandler.Range >= t_targetDistance)//Attack
+            if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
                 TryAttackOrHealTarget(t_target);
             }
-            else if (t_targetDistance > 0f)//Move to enemy base position or defense position
+            else if (t_targetDistance > 0f)
             {
                 MoveTo(t_targetPosition, t_targetDistance, deltaTime);
             }
-            else//Idle, do nothing
+            else
             {
                 SwitchUnitState(UnitState.Idle);
             }

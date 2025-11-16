@@ -24,30 +24,54 @@ namespace Assets.Version2.StatusEffectSystem
             return null;
         }
 
-        public void ApplyModifier(StatusModifier modifier)
+        //Return ture means the current target has the status effect, false means do not have.
+        public bool ApplyModifier(StatusEffectDataSO data, int level, Unit target, Unit source)
         {
-            StatusModifier t_existModifier = QueryModifier(modifier.GetSourceDataID());
-            if (t_existModifier != null)
+            //Check whether the target has had the status effect.
+            StatusModifier t_modifier = QueryModifier(data.GetInstanceID());
+            //If don't have, add new status effect.
+            if (t_modifier == null)
             {
-                switch (modifier.CurrentVariant.StackType)
+                switch(data.EffectType)
                 {
-                    case StatusEffectStack.UniqueRefresh:
-                        t_existModifier.RefreshDuration();
+                    case StatusEffectType.Heal:
+                        t_modifier = new HealStatusModifier(data, level, target, source);
                         break;
-                    case StatusEffectStack.Stack:
-                        t_existModifier.StackUp();
+                    case StatusEffectType.Weakened:
+                        t_modifier = new WeakenedStatusModifier(data, level, target);
                         break;
-                    case StatusEffectStack.StackRefresh:
-                        t_existModifier.StackUp();
-                        t_existModifier.RefreshDuration();
+                    case StatusEffectType.None:
+                        t_modifier = null;
+                        GameManager.LogWarningEditor($"StatusEffectManager: The type of status effect is none.");
+                        break;
+                    default:
+                        t_modifier = null;
+                        GameManager.LogWarningEditor($"StatusEffectManager: No such type of status effect.");
                         break;
                 }
+
+                if (t_modifier == null)
+                {
+                    GameManager.LogWarningEditor($"StatusEffectManager: Cannot add status effect.");
+                    return false;
+                }
+
+                m_modifiers.Add(t_modifier);
+                t_modifier.Apply();
+                return false;
             }
-            else
+
+            //If have, modify the existing status effect.
+            if (t_modifier.CurrentVariant.CanStack)
             {
-                m_modifiers.Add(modifier);
-                modifier.Apply();
+                t_modifier.StackUp();
             }
+            if (t_modifier.CurrentVariant.CanRefresh)
+            {
+                t_modifier.RefreshDuration();
+            }
+
+            return true;
         }
 
         public void TickModifier(float deltaTime)

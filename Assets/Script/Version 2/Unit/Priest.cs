@@ -1,6 +1,5 @@
 using UnityEngine;
 using Assets.Version2.GameEnum;
-using Assets.Version2.StatusEffectSystem;
 
 namespace Assets.Version2
 {
@@ -44,49 +43,52 @@ namespace Assets.Version2
 
             Vector3 t_targetPosition = (t_target != null) ? t_target.transform.position : m_defensePosition;
             float t_targetDistance = Vector3.Distance(transform.position, t_targetPosition);
+            
+            //When playing heal animation, interrupt the all action.
+            if (m_currentState == UnitState.Attack && !m_view.AnimationIsDone((int)UnitState.Attack))
+            {
+                m_view.Face(t_targetPosition.x);
+                return;
+            }
 
             if (t_target != null && m_healHandler.Range >= t_targetDistance)
             {
-                //Must wait for the healing animation to finish playing
-                if (m_view.AnimationIsDone((int)UnitState.Attack))
+                //Play healing animation and Execute heal
+                if (Interact.CurrentCD == 0f)
                 {
-                    //Play healing animation and Execute heal
-                    if (Interact.CurrentCD == 0f)
-                    {
-                        m_view.Face(t_targetPosition.x);
-                        SwitchUnitState(UnitState.Attack);
-                        m_view.ResetAnimation((int)UnitState.Attack);
-                        m_healHandler.ReleaseSkill(this);
-                        return;
-                    }
+                    m_view.Face(t_targetPosition.x);
+                    SwitchUnitState(UnitState.Attack);
+                    m_view.ResetAnimation((int)UnitState.Attack);
+                    m_healHandler.ReleaseSkill(this);
 
-                    //During the waiting period after healing, move to the indicated positoin,
-                    //but cannot move beyond the healing range(minus 0.5) of the healed unit
-                    //and is not at the indicated position.
-                    t_targetDistance += 0.5f;
-                    float t_defensePostionDistance = Vector3.Distance(transform.position, m_defensePosition);
-                    if (m_healHandler.Range > t_targetDistance && t_defensePostionDistance > 0f)
-                    {
-                        m_view.Face(m_defensePosition.x);
-                        MoveTo(m_defensePosition, t_defensePostionDistance, deltaTime);
-                    }
-                    else
-                    {
-                        m_view.Face(t_targetPosition.x);
-                        SwitchUnitState(UnitState.Idle);
-                    }
+                    return;
+                }
+
+                //During the waiting period after healing, move to the indicated positoin,
+                //but cannot move beyond the healing range(minus 0.5) of the healed unit
+                //and is not at the indicated position.
+                t_targetDistance += 0.5f;
+                float t_defensePostionDistance = Vector3.Distance(transform.position, m_defensePosition);
+                if (m_healHandler.Range > t_targetDistance && t_defensePostionDistance > 0f)
+                {
+                    t_targetPosition = m_defensePosition;
+                    MoveTo(t_targetPosition, t_defensePostionDistance, deltaTime);
+                }
+                else
+                {
+                    SwitchUnitState(UnitState.Idle);
                 }
             }
             else if (t_targetDistance > 0f)
             {
-                m_view.Face(t_targetPosition.x);
                 MoveTo(t_targetPosition, t_targetDistance, deltaTime);
             }
             else
             {
-                m_view.Face(t_targetPosition.x);
                 SwitchUnitState(UnitState.Idle);
             }
+
+            m_view.Face(t_targetPosition.x);
         }
 
         protected override void NotifyWhenDying(float attackPoint)

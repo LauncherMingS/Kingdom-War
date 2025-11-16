@@ -55,6 +55,8 @@ namespace Assets.Version2
 
         public virtual void UnInitialize()
         {
+            ClearTarget();
+
             GetComponent<Unit>().OnUpdateCD -= UpdateCD;
         }
     }

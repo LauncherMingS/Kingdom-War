@@ -24,9 +24,8 @@ namespace Assets.Version2
                 }
 
                 m_healable = m_target.Healable;
-                if (m_healable.IsDead || m_healable.IsFullHP)
+                if (CheckStopHeal())
                 {
-                    ClearTarget();
                     return;
                 }
 
@@ -42,33 +41,23 @@ namespace Assets.Version2
 
         public void ReleaseSkill(Unit holder)
         {
-            switch (m_data.EffectType)
-            {
-                case StatusEffectType.Heal:
-                    ReleaseHeal(holder);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        protected void ReleaseHeal(Unit holder)
-        {
-            if (m_healable == null && Target.StatusManager != null)
+            //Check if the target has StatusManager
+            if (Target.StatusManager == null)
             {
                 GameManager.LogWarningEditor($"{name}: No target or StatusManager.");
                 return;
             }
 
-            //If target has this heal buff, cancel the release.
-            if (Target.StatusManager.QueryModifier(m_data.GetInstanceID()) != null)
+            //Apply the status effect
+            bool t_isHaveModifier = Target.StatusManager.ApplyModifier(m_data, m_level, Target, holder);
+            //If return true, meaning the current target has the status effect,
+            //and if the status effect is unique(cannot stack and cannot refresh),
+            //do not enter cold down.
+            if (t_isHaveModifier && !m_data[m_level].CanStack && !m_data[m_level].CanRefresh)
             {
                 return;
             }
-
-            //Create the buff and release to target.
-            HealStatusModifier t_modifier = new(m_healable, m_data, m_level, Target, holder);
-            Target.StatusManager.ApplyModifier(t_modifier);
+            
             EnterColdDown();
         }
 
@@ -76,6 +65,11 @@ namespace Assets.Version2
         {
             base.ClearTarget();
 
+            if (m_healable != null)
+            {
+                BindingStatus(false);
+                RemoveListener();
+            }
             m_healable = null;
         }
 
@@ -87,58 +81,34 @@ namespace Assets.Version2
 
         protected void RegisterListener()
         {
-            if (m_healable != null)
-            {
-                m_healable.OnHealed += CheckStopHeal;
-                m_healable.OnDying += CheckStopHeal;
-            }
+            m_healable.OnHealed += CheckStopHeal;
+            m_healable.OnDying += CheckStopHeal;
         }
 
         protected void RemoveListener()
         {
-            if (m_healable != null)
-            {
-                m_healable.OnHealed -= CheckStopHeal;
-                m_healable.OnDying -= CheckStopHeal;
-            }
+            m_healable.OnHealed -= CheckStopHeal;
+            m_healable.OnDying -= CheckStopHeal;
         }
 
         //There are three situations that will interrupt the heal
         //1. Hurted unit is full HP(m_healable.OnHealed Invoke)
         //2. Hurted unit dies(m_healable.OnDying Invoke)
         //3. Priest dies(UnInitialize())
-        protected void CheckStopHeal(float point)
+        protected bool CheckStopHeal()
         {
             if (m_healable.IsDead || m_healable.IsFullHP)
             {
-                BindingStatus(false);
-                RemoveListener();
-
                 ClearTarget();
+                return true;
             }
+
+            return false;
         }
 
-        //Invoke by animation event(Priest Heal)
-        public void OnExecuteHeal()
+        protected void CheckStopHeal(float point)
         {
-            if (m_healable != null && !m_healable.IsDead)
-            {
-                m_healable.BeingHealed(m_currentPoint);
-                EnterColdDown();
-            }
-        }
-
-        public override void UnInitialize()
-        {
-            base.UnInitialize();
-
-            if (m_healable != null)
-            {
-                BindingStatus(false);
-                RemoveListener();
-
-                ClearTarget();
-            }
+            CheckStopHeal();
         }
     }
 }

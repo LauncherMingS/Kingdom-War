@@ -9,35 +9,30 @@ namespace Assets.Version2.StatusEffectSystem
         [Header("Target")]
         [SerializeField] protected IHealable m_healable;
         [SerializeField] protected ParticleSystem m_particleEffect;
+        [SerializeField] protected Unit m_source;
 
 
-        public HealStatusModifier(IHealable healable, StatusEffectDataSO data, int level
-            , Unit target, Unit sourceUnit): base(data, level, sourceUnit)
+        public HealStatusModifier(StatusEffectDataSO data, int level, Unit target, Unit source) : base(data, level, target)
         {
-            m_healable = healable;
-            m_particleEffect = ObjectPoolManagerSO.Instance.Get<ParticleSystem>(Group.None, UnitType.HealParticle);
-            m_particleEffect.transform.position = target.transform.position;
-            m_particleEffect.transform.SetParent(target.transform);
+            m_healable = target.Healable;
+            m_source = source;
 
             UpdateEffectValue();
-        }
-
-
-        public void Effect()
-        {
-            m_healable.BeingHealed(m_currentPoint);//還要再加上Operation Argument
         }
 
         public override void UpdateEffectValue()
         {
             //Spread the base point and source unit point
-            m_currentPoint = m_currentVariant.BasePoint + m_sourceUnit.Interact.CurrentPoint;
+            m_currentPoint = m_currentVariant.BasePoint + m_source.Interact.CurrentPoint;
             float t_frequence = m_remainDuration / m_currentVariant.TickInterval;
             m_currentPoint /= t_frequence;
         }
 
         public override void Apply()
         {
+            m_particleEffect = ObjectPoolManagerSO.Instance.Get<ParticleSystem>(Group.None, m_particleType);
+            m_particleEffect.transform.position = m_target.transform.position;
+            m_particleEffect.transform.SetParent(m_target.transform);
             m_particleEffect.Play();
         }
 
@@ -60,10 +55,15 @@ namespace Assets.Version2.StatusEffectSystem
             return false;
         }
 
+        public override void Effect()
+        {
+            m_healable.BeingHealed(m_currentPoint);//還要再加上Operation Argument
+        }
+
         public override void Remove()
         {
             m_particleEffect.Stop();
-            ObjectPoolManagerSO.Instance.Recycle(Group.None, UnitType.HealParticle, m_particleEffect);
+            ObjectPoolManagerSO.Instance.Recycle(Group.None, m_particleType, m_particleEffect);
         }
     }
 }

@@ -7,6 +7,7 @@
         Archer = 2,
         Priest = 3,
         Projectile = 4,
-        HealParticle = 5
+        HealParticle = 5,
+        WeakenedParticle = 6
     }
 }

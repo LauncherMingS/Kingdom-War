@@ -35,24 +35,25 @@ namespace Assets.Version2
 
             m_view.Face(t_targetPosition.x);
 
-            if (t_target != null && m_attackHandler.Range >= t_targetDistance)//Attack
+            if (t_target != null && m_attackHandler.Range >= t_targetDistance)
             {
                 //Ensure arrow(projectile) can hit target
                 float t_targetDistanceZ = Mathf.Abs(t_targetPosition.z - transform.position.z);
                 if (m_attackHandler.ProjectileRadius >= t_targetDistanceZ)
                 {
                     TryAttackOrHealTarget(t_target);
-                    return;
                 }
-
-                t_targetPosition.x = transform.position.x;
-                MoveTo(t_targetPosition, t_targetDistance, deltaTime);
+                else
+                {
+                    t_targetPosition.x = transform.position.x;
+                    MoveTo(t_targetPosition, t_targetDistance, deltaTime);
+                }
             }
-            else if (t_targetDistance > 0f)//Move to enemy base position or defense position
+            else if (t_targetDistance > 0f)
             {
                 MoveTo(t_targetPosition, t_targetDistance, deltaTime);
             }
-            else//Idle, do nothing
+            else
             {
                 SwitchUnitState(UnitState.Idle);
             }

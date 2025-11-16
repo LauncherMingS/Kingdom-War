@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Assets.Version2.GameEnum;
 
 namespace Assets.Version2.StatusEffectSystem
 {
@@ -7,31 +8,31 @@ namespace Assets.Version2.StatusEffectSystem
     public abstract class StatusModifier
     {
         [Header("Source Info")]
-        [SerializeField] protected Unit m_sourceUnit;
         [SerializeField] protected StatusEffectDataSO m_sourceData;
         [SerializeField] protected int m_level;
         [Header("Parameter")]
+        [SerializeField] protected Transform m_target;
         [SerializeField] protected StatusEffectDataSO.Variant m_currentVariant;
         [SerializeField] protected float m_currentPoint;
         [SerializeField] protected float m_remainDuration;
         [SerializeField] protected float m_currentTickCD;
         [SerializeField] protected int m_currentStack;
-        [SerializeField] protected float m_affectedPoint;//use to trace back affected point
+        [SerializeField] protected UnitType m_particleType;
 
         public StatusEffectDataSO.Variant CurrentVariant => m_currentVariant;
 
 
-        public StatusModifier(StatusEffectDataSO data, int level, Unit sourceUnit)
+        public StatusModifier(StatusEffectDataSO data, int level, Unit target)
         {
             m_sourceData = data;
             m_level = level;
-            m_currentVariant = m_sourceData.GetVariant(m_level);
 
-            m_sourceUnit = sourceUnit;
-
+            m_target = target.transform;
+            m_currentVariant = m_sourceData[m_level];
             m_remainDuration = m_currentVariant.Duration;
             m_currentTickCD = m_currentVariant.FirstTickDelay;
-            m_currentStack = 1;
+            m_currentStack = 0;
+            m_particleType = m_currentVariant.ParticleType;
         }
 
         public int GetSourceDataID()
@@ -44,20 +45,20 @@ namespace Assets.Version2.StatusEffectSystem
             return m_sourceData.GetInstanceID() == sourceDataID;
         }
 
-        public void RefreshDuration()
+        public virtual void RefreshDuration()
         {
             m_remainDuration = m_currentVariant.Duration;
         }
 
-        public void StackUp(int stackNum = 1)
+        public virtual void StackUp(int stackNum = 1)
         {
             m_currentStack = Mathf.Min(m_currentStack + stackNum, m_currentVariant.MaxStack);
-            UpdateEffectValue();
         }
 
-        public abstract void UpdateEffectValue();
+        public virtual void UpdateEffectValue() { }
         public abstract void Apply();
         public abstract bool Tick(float deltaTime);
+        public virtual void Effect() { }
         public abstract void Remove();
     }
 }
