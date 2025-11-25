@@ -4,6 +4,7 @@ namespace Assets.Version2
 {
     public interface IDamageable
     {
+        public float DamageModifier { get; set; }
         public bool IsDead { get; }
         public void TakeDamage(float point);
     }
