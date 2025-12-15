@@ -1,61 +1,46 @@
 using UnityEngine;
-using Assets.Version2.GameEnum;
-using Assets.Version2.Pool;
 
 namespace Assets.Version2.StatusEffectSystem
 {
-    public class WeakenedStatusModifier : StatusModifier
+    public class WeakenedStatusModifier : StatusModifierBase
     {
-        [SerializeField] protected IDamageable m_damageable;
-        [SerializeField] protected ParticleSystem m_particleEffect;
+        [SerializeField] protected StatusEffectManager m_targetStatusManager;
 
 
-        public WeakenedStatusModifier (StatusEffectDataSO data, int level, Unit target): base(data, level, target)
+        public void UpdateEffectPoint()
         {
-            m_currentPoint = m_currentVariant.BasePoint;
-            m_damageable = target.Damageable;
+            m_currentPoint = 1f + m_sourceData.BasePoint * m_currentStack;
         }
 
-        public override void RefreshDuration()
+        public void Initialize(StatusEffectDataSO data, Unit target)
         {
-            m_remainDuration = m_currentVariant.Duration;
+            base.OnInitialize(data, target);
+
+            m_targetStatusManager = target.StatusManager;
+
+            UpdateEffectPoint();
         }
 
-        public override void StackUp(int stackNum = 1)
+        public override void OnStack()
         {
-            m_damageable.DamageModifier = Mathf.Ceil(m_damageable.DamageModifier - m_currentPoint * m_currentStack);
+            m_targetStatusManager.RemoveDamageModifier(m_currentPoint);
 
-            base.StackUp(stackNum);
+            base.OnStack();
+            UpdateEffectPoint();
 
-            m_damageable.DamageModifier = Mathf.Ceil(m_damageable.DamageModifier + m_currentPoint * m_currentStack);
+            m_targetStatusManager.AddDamageModifier(m_currentPoint);
         }
 
-        public override void Apply()
+        public override void OnApply()
         {
-            m_particleEffect = ObjectPoolManagerSO.Instance.Get<ParticleSystem>(Group.None, m_particleType);
-            m_particleEffect.transform.position = m_target.transform.position;
-            m_particleEffect.transform.SetParent(m_target.transform);
-            m_particleEffect.Play();
-            StackUp();
+            base.OnApply();
+            m_targetStatusManager.AddDamageModifier(m_currentPoint);
         }
 
-        public override bool Tick(float deltaTime)
+        public override void OnRemove()
         {
-            m_remainDuration = Mathf.Max(m_remainDuration - deltaTime, 0f);
-            if (m_remainDuration == 0f)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public override void Remove()
-        {
-            m_particleEffect.Stop();
-            ObjectPoolManagerSO.Instance.Recycle(Group.None, m_particleType, m_particleEffect);
-
-            m_damageable.DamageModifier = Mathf.Ceil(m_damageable.DamageModifier - m_currentPoint * m_currentStack);
+            base.OnRemove();
+            m_targetStatusManager.RemoveDamageModifier(m_currentPoint);
         }
     }
 }

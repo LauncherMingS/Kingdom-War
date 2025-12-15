@@ -1,3 +1,4 @@
+using Assets.Version2.StatusEffectSystem;
 using System;
 using UnityEngine;
 
@@ -5,12 +6,12 @@ namespace Assets.Version2
 {
     public class Health : MonoBehaviour, IDamageable, IHealable
     {
-        [SerializeField] private float m_maxHP = 20f;
+        [SerializeField] private float m_maxHP;
         [SerializeField] private float m_currentHP;
-        [SerializeField] private float m_damageModifier = 1f;
+        [SerializeField] private float m_damageModifier;
         [SerializeField] private bool m_isDead;
-        [SerializeField] private bool m_isFullHP;
-        [SerializeField] private bool m_isAcceptHealed;
+
+        [SerializeField] private StatusEffectManager m_statusEffectManager;
 
         public event Action<float> OnHurt;
         public event Action<float> OnHealed;
@@ -18,25 +19,14 @@ namespace Assets.Version2
 
         public float DamageModifier
         {
-            get => m_damageModifier;
+            get => m_damageModifier * m_statusEffectManager.GetTotalDamageMultiplier();
             set => m_damageModifier = value;
         }
 
         public bool IsDead => m_isDead;
 
-        public bool IsFullHP => m_isFullHP;
+        public bool IsFullHP => m_currentHP == m_maxHP;
 
-        public bool IsAcceptHealed
-        {
-            get => m_isAcceptHealed;
-            set => m_isAcceptHealed = value;
-        }
-
-
-        public void CheckIsFullHP()
-        {
-            m_isFullHP = (m_currentHP == m_maxHP);
-        }
 
         public void TakeDamage(float point)
         {
@@ -45,7 +35,7 @@ namespace Assets.Version2
                 return;
             }
 
-            point *= m_damageModifier;
+            point *= DamageModifier;
             m_currentHP = Mathf.Clamp(m_currentHP - point, 0f, m_maxHP);
 
             if (m_currentHP <= 0f)
@@ -55,7 +45,6 @@ namespace Assets.Version2
                 return;
             }
 
-            CheckIsFullHP();
             OnHurt?.Invoke(point);
         }
 
@@ -68,17 +57,21 @@ namespace Assets.Version2
 
             m_currentHP = Mathf.Clamp(m_currentHP + point, 0f, m_maxHP);
 
-            CheckIsFullHP();
             OnHealed?.Invoke(point);
         }
 
-        public void Initialize()
+        public void Initialize(StatusEffectManager manager)
         {
             m_currentHP = m_maxHP;
             m_damageModifier = 1f;
             m_isDead = false;
 
-            CheckIsFullHP();
+            m_statusEffectManager = manager;
+        }
+
+        public void Uninitialize()
+        {
+            OnDying = OnHealed = OnHurt = null;
         }
     }
 }

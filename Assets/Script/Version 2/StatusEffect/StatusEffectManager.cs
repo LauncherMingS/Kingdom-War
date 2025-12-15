@@ -7,10 +7,11 @@ namespace Assets.Version2.StatusEffectSystem
     [Serializable]
     public class StatusEffectManager
     {
-        [SerializeField] private List<StatusModifier> m_modifiers;
+        [SerializeField] private List<StatusModifierBase> m_modifiers;
+        [SerializeField] private List<float> m_damageModifiers;
 
 
-        public StatusModifier QueryModifier(int id)
+        public StatusModifierBase QueryModifier(int id)
         {
             int modifierCount = m_modifiers.Count;
             for (int i = 0; i < modifierCount; i++)
@@ -24,95 +25,92 @@ namespace Assets.Version2.StatusEffectSystem
             return null;
         }
 
-        //Return ture means the current target has the status effect, false means do not have.
-        public bool ApplyModifier(StatusEffectDataSO data, int level, Unit target, Unit source)
+        public void ApplyModifier(StatusEffectDataSO data, Unit target, Unit source)
         {
             //Check whether the target has had the status effect.
-            StatusModifier t_modifier = QueryModifier(data.GetInstanceID());
+            StatusModifierBase t_modifier = QueryModifier(data.GetInstanceID());
+
             //If don't have, add new status effect.
             if (t_modifier == null)
             {
-                switch(data.EffectType)
-                {
-                    case StatusEffectType.Heal:
-                        t_modifier = new HealStatusModifier(data, level, target, source);
-                        break;
-                    case StatusEffectType.Weakened:
-                        t_modifier = new WeakenedStatusModifier(data, level, target);
-                        break;
-                    case StatusEffectType.None:
-                        t_modifier = null;
-                        GameManager.LogWarningEditor($"StatusEffectManager: The type of status effect is none.");
-                        break;
-                    default:
-                        t_modifier = null;
-                        GameManager.LogWarningEditor($"StatusEffectManager: No such type of status effect.");
-                        break;
-                }
+                t_modifier = StatusEffectCentral.Instance.CreateStatusModifier(data, target, source);
 
                 if (t_modifier == null)
                 {
                     GameManager.LogWarningEditor($"StatusEffectManager: Cannot add status effect.");
-                    return false;
+                    return;
                 }
 
                 m_modifiers.Add(t_modifier);
-                t_modifier.Apply();
-                return false;
+                t_modifier.OnApply();
+                return;
             }
 
             //If have, modify the existing status effect.
-            if (t_modifier.CurrentVariant.CanStack)
-            {
-                t_modifier.StackUp();
-            }
-            if (t_modifier.CurrentVariant.CanRefresh)
-            {
-                t_modifier.RefreshDuration();
-            }
-
-            return true;
+            t_modifier.OnStack();
         }
 
         public void TickModifier(float deltaTime)
         {
-            int t_modifierCount = m_modifiers.Count;
-            for (int i = 0; i < t_modifierCount; i++)
+            for (int i = m_modifiers.Count - 1; i >= 0; i--)
             {
-                if (m_modifiers[i].Tick(deltaTime))
+                if (m_modifiers[i].OnTick(deltaTime))
                 {
-                    RemoveModifier(m_modifiers[i], i);
+                    RemoveModifier(i);
                 }
             }
         }
 
-        public void RemoveModifier(StatusModifier modifier, int index)
+        public void RemoveModifier(int removeIndex)
         {
-            modifier.Remove();
-            m_modifiers.RemoveAt(index);
+            m_modifiers[removeIndex].OnRemove();
+            m_modifiers.RemoveAt(removeIndex);
         }
 
         //When the carrier dying, remove all modifier and their visual effect(particle...)
         public void ForceRemoveAllModifier()
         {
-            int t_modifierCount = m_modifiers.Count;
-            for (int i = 0; i < t_modifierCount; i++)
+            for (int i = m_modifiers.Count - 1; i >= 0; i--)
             {
-                RemoveModifier(m_modifiers[i], i);
+                RemoveModifier(i);
             }
+            for (int i = m_damageModifiers.Count - 1; i >= 0; i--)
+            {
+                m_damageModifiers.RemoveAt(i);
+            }
+        }
+
+        public void AddDamageModifier(float multiplier)
+        {
+            m_damageModifiers.Add(multiplier);
+        }
+
+        public void RemoveDamageModifier(float multiplier)
+        {
+            m_damageModifiers.Remove(multiplier);
+        }
+
+        public float GetTotalDamageMultiplier()
+        {
+            float t_totalMultiplier = 1f;
+            for (int i = 0; i < m_damageModifiers.Count; i++)
+            {
+                t_totalMultiplier *= m_damageModifiers[i];
+            }
+
+            return t_totalMultiplier;
         }
 
         public void Initialize(Unit holder)
         {
-            m_modifiers = new List<StatusModifier>();
+            m_modifiers ??= new();
+            m_damageModifiers ??= new();
             holder.OnUpdateCD += TickModifier;
         }
 
-        public void UnInitialize(Unit holder)
+        public void UnInitialize()
         {
             ForceRemoveAllModifier();
-            m_modifiers.Clear();
-            holder.OnUpdateCD -= TickModifier;
         }
     }
 }
